@@ -82,7 +82,7 @@ const SuperAdmin = () => {
 
     const getAllEmployee = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/employee/allemployee`);
+            const res = await axios.get(`https://systrack-backend-deployment.onrender.com/api/employee/allemployee`);
             setEmployees(res.data.employees);
         } catch (error) {
             console.error(`Error fetching Employees:`, error)
@@ -91,7 +91,7 @@ const SuperAdmin = () => {
 
     const getAllParts = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/part`);
+            const res = await axios.get(`https://systrack-backend-deployment.onrender.com/api/part`);
             setParts(res.data.parts);
         } catch (error) {
             console.error(`Error fetching parts:`, error)
@@ -100,7 +100,7 @@ const SuperAdmin = () => {
 
     const getAllSystems = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/system/allsys`);
+            const res = await axios.get(`https://systrack-backend-deployment.onrender.com/api/system/allsys`);
             setSystems(res.data.systems);
         } catch (error) {
             console.error(`Error fetching parts:`, error)

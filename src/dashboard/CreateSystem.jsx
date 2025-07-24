@@ -21,7 +21,7 @@ const CreateSystem = ({ onClose }) => {
 
     const fetchUnassignedEmployees = async () => {
         try {
-            const res = await axios.get("http://localhost:5000/api/employee/unassigned");
+            const res = await axios.get("https://systrack-backend-deployment.onrender.com/employee/unassigned");
             setUnassignedEmployees(res.data.employees);
         } catch (error) {
             console.error("Failed to fetch Unassigned employees:", error);
@@ -30,7 +30,7 @@ const CreateSystem = ({ onClose }) => {
 
     const fetchSystems = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/system/allsys');
+            const res = await axios.get('https://systrack-backend-deployment.onrender.com/api/system/allsys');
             setSystems(res.data.systems);
         } catch (err) {
             console.log(err);
@@ -42,7 +42,7 @@ const CreateSystem = ({ onClose }) => {
 
     const fetchFreeParts = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/part/freeparts');
+            const res = await axios.get('https://systrack-backend-deployment.onrender.com/api/part/freeparts');
             setAllParts(res.data.parts);
             setParts(res.data.parts);
         } catch (err) {
@@ -94,7 +94,7 @@ const CreateSystem = ({ onClose }) => {
         };
 
         try {
-            const res = await axios.post('http://localhost:5000/api/system/', {
+            const res = await axios.post('https://systrack-backend-deployment.onrender.com/api/system/', {
                 name,
                 parts: selectedPartIds,
                 EmployeeID: selectedEmployeeId

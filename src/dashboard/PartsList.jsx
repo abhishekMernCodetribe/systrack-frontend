@@ -53,7 +53,7 @@ const PartsList = () => {
         try {
             if (!selectedPart?._id) return;
 
-            const res = await axios.delete(`http://localhost:5000/api/part/${selectedPart._id}`);
+            const res = await axios.delete(`https://systrack-backend-deployment.onrender.com/api/part/${selectedPart._id}`);
             fetchParts();
             setSelectedPart(null);
             setOpenModal(null);
@@ -68,7 +68,7 @@ const PartsList = () => {
         try {
             setErrors({});
             const res = await axios.put(
-                `http://localhost:5000/api/part/${selectedPart._id}`,
+                `https://systrack-backend-deployment.onrender.com/api/part/${selectedPart._id}`,
                 selectedPart
             );
             handleClose();
@@ -86,7 +86,7 @@ const PartsList = () => {
 
     const fetchParts = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/part');
+            const res = await axios.get('https://systrack-backend-deployment.onrender.com/api/part');
             setParts(res.data.parts);
         } catch (err) {
             console.log(err);

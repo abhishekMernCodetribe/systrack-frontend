@@ -38,7 +38,7 @@ const CreateParts = ({ onClose }) => {
 
     const fetchParts = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/part');
+            const res = await axios.get('https://systrack-backend-deployment.onrender.com/api/part');
             setParts(res.data.parts);
         } catch (err) {
             console.log(err);
@@ -62,7 +62,7 @@ const CreateParts = ({ onClose }) => {
                 ...formData,
                 assignedSystem: []
             };
-            const res = await axios.post("http://localhost:5000/api/part", payload);
+            const res = await axios.post("https://systrack-backend-deployment.onrender.com/api/part", payload);
             fetchParts();
             toast.success(res.data.message);
             onClose();

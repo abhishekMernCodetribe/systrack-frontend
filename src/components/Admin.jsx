@@ -17,7 +17,7 @@ const Admin = () => {
         const verifyAdmin = async () => {
             try {
                 const res = await axios.get(
-                    "http://localhost:5000/api/users/admin",
+                    "https://systrack-backend-deployment.onrender.com/api/users/admin",
                     {
                         headers:{
                             Authorization: `Bearer ${token}`,
