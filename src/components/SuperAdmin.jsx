@@ -31,7 +31,7 @@ const SuperAdmin = () => {
         const verifySuperAdmin = async () => {
             try {
                 const res = await axios.get(
-                    "http://localhost:5000/api/users/superadmin",
+                    "https://systrack-backend-deployment.onrender.com/api/users/superadmin",
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
