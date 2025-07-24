@@ -12,6 +12,7 @@ import {
 import isEqual from "lodash.isequal";
 
 const EmployeeList = () => {
+    const baseURL = import.meta.env.VITE_API_BASE_URL;
     const { employees, setEmployees } = useEmployees();
     const navigate = useNavigate();
     const [openMenuId, setOpenMenuId] = useState(null);
@@ -98,7 +99,7 @@ const EmployeeList = () => {
                 return;
             }
             const updatedEmployee = getUpdatedFields(originalData, editForm);
-            const res = await axios.put(`https://systrack-backend-deployment.onrender.com/api/employee/${selectedEmployee._id}`, updatedEmployee);
+            const res = await axios.put(`${baseURL}/api/employee/${selectedEmployee._id}`, updatedEmployee);
             toast.success(res.data.message);
             fetchEmployees();
             setErrors({});
@@ -126,7 +127,7 @@ const EmployeeList = () => {
 
     const fetchEmployees = async () => {
         try {
-            const res = await axios.get('https://systrack-backend-deployment.onrender.com/api/employee/allemployee');
+            const res = await axios.get(`${baseURL}/api/employee/allemployee`);
             setEmployees(res.data.employees);
         } catch (err) {
             console.log(err);
@@ -143,7 +144,7 @@ const EmployeeList = () => {
     const handleDelete = async () => {
         try {
             if (!selectedEmployee._id) return;
-            const res = await axios.delete(`https://systrack-backend-deployment.onrender.com/api/employee/${selectedEmployee._id}`);
+            const res = await axios.delete(`${baseURL}/api/employee/${selectedEmployee._id}`);
             fetchEmployees();
             setSelectedEmployee(null);
             setOpenModal(null);

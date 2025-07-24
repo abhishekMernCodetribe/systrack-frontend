@@ -6,6 +6,7 @@ import { useSystems } from '../context/SystemContext.jsx';
 import { useParts } from '../context/PartsContext.jsx';
 
 const SuperAdminDashboard = () => {
+  const baseURL = import.meta.env.VITE_API_BASE_URL;
   const [stats, setStats] = useState({
     totalSystems: 0,
     totalParts: 0,
@@ -20,7 +21,7 @@ const SuperAdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const res = await axios.get('https://systrack-backend-deployment.onrender.com/api/system/stats');
+      const res = await axios.get(`${baseURL}/api/system/stats`);
       setStats((prev) => ({ ...prev, ...res.data }));
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -53,7 +54,7 @@ const SuperAdminDashboard = () => {
     }
 
     try {
-      const res = await axios.get(`https://systrack-backend-deployment.onrender.com${endpoint}`);
+      const res = await axios.get(`${baseURL}${endpoint}`);
       if (type == 'employees') setEmployees(res.data[type]);
       else if (type == 'parts') setParts(res.data[type]);
       else if (type == 'systems') setSystems(res.data[type]);

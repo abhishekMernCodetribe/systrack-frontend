@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from 'react-toastify';
 
 const CreateEmployee = ({ onClose }) => {
+    const baseURL = import.meta.env.VITE_API_BASE_URL;
     const { setEmployees } = useEmployees();
     const [newEmployee, setNewEmployee] = useState({
         name: '',
@@ -46,7 +47,7 @@ const CreateEmployee = ({ onClose }) => {
         e.preventDefault();
         try {
             setErrors({});
-            const res = await axios.post('https://systrack-backend-deployment.onrender.com/api/employee', newEmployee);
+            const res = await axios.post(`${base}/api/employee`, newEmployee);
             if (res.status === 201) {
                 setEmployees((prev) => [...prev, res.data]);
                 toast.success(res.data.message || "Employee created successfully");

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 const Admin = () => {
+    const baseURL = import.meta.env.VITE_API_BASE_URL;
     const navigate = useNavigate();
     const [authorized, setAuthorized] = useState(false);
     const [componentLoading, setComponentLoading] = useState(true);
@@ -17,7 +18,7 @@ const Admin = () => {
         const verifyAdmin = async () => {
             try {
                 const res = await axios.get(
-                    "https://systrack-backend-deployment.onrender.com/api/users/admin",
+                    `${baseURL}/api/users/admin`,
                     {
                         headers:{
                             Authorization: `Bearer ${token}`,

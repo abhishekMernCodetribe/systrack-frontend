@@ -11,6 +11,7 @@ import {
 import { toast } from 'react-toastify';
 
 const PartsList = () => {
+    const baseURL = import.meta.env.VITE_API_BASE_URL;
     const { parts, setParts } = useParts();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -53,7 +54,7 @@ const PartsList = () => {
         try {
             if (!selectedPart?._id) return;
 
-            const res = await axios.delete(`https://systrack-backend-deployment.onrender.com/api/part/${selectedPart._id}`);
+            const res = await axios.delete(`${baseURL}/api/part/${selectedPart._id}`);
             fetchParts();
             setSelectedPart(null);
             setOpenModal(null);
@@ -68,7 +69,7 @@ const PartsList = () => {
         try {
             setErrors({});
             const res = await axios.put(
-                `https://systrack-backend-deployment.onrender.com/api/part/${selectedPart._id}`,
+                `${baseURL}/api/part/${selectedPart._id}`,
                 selectedPart
             );
             handleClose();
@@ -86,7 +87,7 @@ const PartsList = () => {
 
     const fetchParts = async () => {
         try {
-            const res = await axios.get('https://systrack-backend-deployment.onrender.com/api/part');
+            const res = await axios.get(`${baseURL}/api/part`);
             setParts(res.data.parts);
         } catch (err) {
             console.log(err);

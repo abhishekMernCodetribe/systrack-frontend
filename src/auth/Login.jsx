@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 
 const Login = () => {
+  const baseURL = import.meta.env.VITE_API_BASE_URL;
   const [data, setData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -16,7 +17,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await axios.post(
-        "https://systrack-backend-deployment.onrender.com/api/users/login",
+        `${baseURL}/api/users/login`,
         data,
         {
           withCredentials: true,

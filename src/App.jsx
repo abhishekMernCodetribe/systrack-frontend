@@ -9,7 +9,6 @@ import SystemListPage from "./dashboard/SystemListPage";
 import EmployeeList from "./dashboard/EmployeeList";
 import PartsList from "./dashboard/PartsList";
 
-
 const App = () => {
   return (
     <Router>

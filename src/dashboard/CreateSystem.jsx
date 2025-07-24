@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { useSystems } from '../context/SystemContext';
 
 const CreateSystem = ({ onClose }) => {
+    const baseURL = import.meta.env.VITE_API_BASE_URL;
     const [parts, setParts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -21,7 +22,7 @@ const CreateSystem = ({ onClose }) => {
 
     const fetchUnassignedEmployees = async () => {
         try {
-            const res = await axios.get("https://systrack-backend-deployment.onrender.com/employee/unassigned");
+            const res = await axios.get(`${baseURL}/api/employee/unassigned`);
             setUnassignedEmployees(res.data.employees);
         } catch (error) {
             console.error("Failed to fetch Unassigned employees:", error);
@@ -30,7 +31,7 @@ const CreateSystem = ({ onClose }) => {
 
     const fetchSystems = async () => {
         try {
-            const res = await axios.get('https://systrack-backend-deployment.onrender.com/api/system/allsys');
+            const res = await axios.get(`${baseURL}/api/system/allsys`);
             setSystems(res.data.systems);
         } catch (err) {
             console.log(err);
@@ -42,7 +43,7 @@ const CreateSystem = ({ onClose }) => {
 
     const fetchFreeParts = async () => {
         try {
-            const res = await axios.get('https://systrack-backend-deployment.onrender.com/api/part/freeparts');
+            const res = await axios.get(`${baseURL}/api/part/freeparts`);
             setAllParts(res.data.parts);
             setParts(res.data.parts);
         } catch (err) {
@@ -94,7 +95,7 @@ const CreateSystem = ({ onClose }) => {
         };
 
         try {
-            const res = await axios.post('https://systrack-backend-deployment.onrender.com/api/system/', {
+            const res = await axios.post(`${baseURL}/api/system/`, {
                 name,
                 parts: selectedPartIds,
                 EmployeeID: selectedEmployeeId

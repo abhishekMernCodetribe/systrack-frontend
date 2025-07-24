@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { useParts } from "../context/PartsContext";
 
 const CreateParts = ({ onClose }) => {
+    const baseURL = import.meta.env.VITE_API_BASE_URL;
     const { parts, setParts } = useParts();
     const [formData, setFormData] = useState({
         partType: '',
@@ -38,7 +39,7 @@ const CreateParts = ({ onClose }) => {
 
     const fetchParts = async () => {
         try {
-            const res = await axios.get('https://systrack-backend-deployment.onrender.com/api/part');
+            const res = await axios.get(`${baseURL}/api/part`);
             setParts(res.data.parts);
         } catch (err) {
             console.log(err);
@@ -62,7 +63,7 @@ const CreateParts = ({ onClose }) => {
                 ...formData,
                 assignedSystem: []
             };
-            const res = await axios.post("https://systrack-backend-deployment.onrender.com/api/part", payload);
+            const res = await axios.post(`${baseURL}/api/part`, payload);
             fetchParts();
             toast.success(res.data.message);
             onClose();

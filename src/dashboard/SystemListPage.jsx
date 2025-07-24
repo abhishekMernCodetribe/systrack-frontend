@@ -10,6 +10,7 @@ import CreateSystem from './CreateSystem';
 import { toast } from 'react-toastify';
 
 const SystemListPage = () => {
+    const baseURL = import.meta.env.VITE_API_BASE_URL;
     const { systems, setSystems } = useSystems();
     const [selectedSystem, setSelectedSystem] = useState(null);
 
@@ -50,7 +51,7 @@ const SystemListPage = () => {
         if (!selectedSystem) return;
         const fetchAssignedParts = async () => {
             try {
-                const res = await axios.get(`https://systrack-backend-deployment.onrender.com/api/system/by-system/${selectedSystem._id}`);
+                const res = await axios.get(`${baseURL}/api/system/by-system/${selectedSystem._id}`);
                 setExistingParts(res.data.parts);
             } catch (err) {
                 console.error("Error fetching parts:", err);
@@ -95,7 +96,7 @@ const SystemListPage = () => {
 
     const fetchUnassignedEmployees = async () => {
         try {
-            const res = await axios.get("https://systrack-backend-deployment.onrender.com/api/employee/unassigned");
+            const res = await axios.get(`${baseURL}/api/employee/unassigned`);
             setUnassignedEmployees(res.data.employees);
         } catch (error) {
             console.error("Failed to fetch Unassigned employees:", error);
@@ -104,7 +105,7 @@ const SystemListPage = () => {
 
     const fetchFreeParts = async () => {
         try {
-            const res = await axios.get('https://systrack-backend-deployment.onrender.com/api/part/freeparts');
+            const res = await axios.get(`${baseURL}/api/part/freeparts`);
             setAllParts(res.data.parts);
             setParts(res.data.parts);
         } catch (err) {
@@ -117,7 +118,7 @@ const SystemListPage = () => {
 
     const fetchSystems = async () => {
         try {
-            const res = await axios.get('https://systrack-backend-deployment.onrender.com/api/system/allsys');
+            const res = await axios.get(`${baseURL}/api/system/allsys`);
             setSystems(res.data.systems);
         } catch (err) {
             console.log(err);
@@ -129,7 +130,7 @@ const SystemListPage = () => {
 
     const handleRemovePartFromSystem = async (partId) => {
         try {
-            await axios.put(`https://systrack-backend-deployment.onrender.com/api/system/${selectedSystem._id}/remove-part/${partId}`);
+            await axios.put(`${baseURL}/api/system/${selectedSystem._id}/remove-part/${partId}`);
             setExistingParts(prev => prev.filter(p => p._id !== partId));
             fetchFreeParts();
             fetchSystems();
@@ -143,7 +144,7 @@ const SystemListPage = () => {
     const handleUnassign = async () => {
         try {
             if (!selectedSystem?._id) return;
-            const res = await axios.patch(`https://systrack-backend-deployment.onrender.com/api/system/unassign/${selectedSystem._id}`);
+            const res = await axios.patch(`${baseURL}/api/system/unassign/${selectedSystem._id}`);
             fetchSystems();
             setSelectedSystem(null);
             toast.success(res.data.message);
@@ -160,7 +161,7 @@ const SystemListPage = () => {
             return;
         }
         try {
-            const res = await axios.post(`https://systrack-backend-deployment.onrender.com/api/system/assignSystem/${selectedSystem._id}`, {
+            const res = await axios.post(`${baseURL}/api/system/assignSystem/${selectedSystem._id}`, {
                 EmployeeID: selectedEmployeeId
             });
 
@@ -177,7 +178,7 @@ const SystemListPage = () => {
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post(`https://systrack-backend-deployment.onrender.com/api/system/updateSystem/${selectedSystem._id}`, {
+            const res = await axios.post(`${baseURL}/api/system/updateSystem/${selectedSystem._id}`, {
                 name: selectedSystem.name,
                 parts: selectedPartIds
             });
