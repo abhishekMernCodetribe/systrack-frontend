@@ -17,10 +17,14 @@ const BarcodeScanner = () => {
 
         try {
             const previewElem = videoRef.current;
-            const devices = await BrowserMultiFormatReader.listVideoInputDevices();
-            const backCamera = devices.find(device => /back|rear/i.test(device.label)) || devices[0];
 
-            codeReader.current.decodeFromVideoDevice(backCamera.deviceId, previewElem, (result, error) => {
+            const constraints = {
+                video: {
+                    facingMode: { exact: "environment" }
+                }
+            };
+
+            await codeReader.current.decodeFromConstraints(constraints, previewElem, (result, error) => {
                 if (result) {
                     const scannedValue = result.getText();
                     setBarcode(scannedValue);
@@ -33,6 +37,7 @@ const BarcodeScanner = () => {
             setScanning(false);
         }
     };
+
 
     const stopScanner = () => {
         codeReader.current?.reset();
