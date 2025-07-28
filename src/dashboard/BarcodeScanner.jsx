@@ -10,21 +10,29 @@ const BarcodeScanner = () => {
     const [part, setPart] = useState(null);
     const [loading, setLoading] = useState(false);
     const codeReader = useRef(null);
+    const mediaStream = useRef(null); // store stream for manual cleanup
 
     const startScanner = async () => {
         setScanning(true);
         codeReader.current = new BrowserMultiFormatReader();
 
-        try {
-            const previewElem = videoRef.current;
+        const previewElem = videoRef.current;
 
+        try {
+            // Manual fallback to show live feed if decode fails to attach video
             const constraints = {
                 video: {
                     facingMode: { exact: "environment" }
-                }
+                },
+                audio: false
             };
 
-            await codeReader.current.decodeFromConstraints(constraints, previewElem, (result, error) => {
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            previewElem.srcObject = stream;
+            previewElem.play();
+            mediaStream.current = stream;
+
+            await codeReader.current.decodeFromVideoDevice(null, previewElem, (result, error) => {
                 if (result) {
                     const scannedValue = result.getText();
                     setBarcode(scannedValue);
@@ -38,9 +46,12 @@ const BarcodeScanner = () => {
         }
     };
 
-
     const stopScanner = () => {
         codeReader.current?.reset();
+        if (mediaStream.current) {
+            mediaStream.current.getTracks().forEach(track => track.stop());
+            mediaStream.current = null;
+        }
         setScanning(false);
     };
 
@@ -60,7 +71,7 @@ const BarcodeScanner = () => {
 
     useEffect(() => {
         return () => {
-            stopScanner();
+            stopScanner(); // Cleanup on unmount
         };
     }, []);
 
@@ -75,7 +86,13 @@ const BarcodeScanner = () => {
                 </button>
             ) : (
                 <>
-                    <video ref={videoRef} className="w-full max-w-md mx-auto rounded-lg shadow" />
+                    <video
+                        ref={videoRef}
+                        className="w-full max-w-md mx-auto rounded-lg shadow bg-black"
+                        autoPlay
+                        muted
+                        playsInline
+                    />
                     <button
                         onClick={stopScanner}
                         className="bg-red-500 text-white px-4 py-2 rounded-md shadow mt-2"
