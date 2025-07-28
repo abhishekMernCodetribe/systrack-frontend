@@ -73,6 +73,7 @@ const SuperAdmin = () => {
 
     if (!authorized) {
         navigate("/");
+        return;
     }
 
     const getAllEmployee = async () => {
