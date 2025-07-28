@@ -1,131 +1,66 @@
-import React, { useEffect, useRef, useState } from "react";
-import { BrowserMultiFormatReader } from "@zxing/browser";
-import axios from "axios";
+import React, { useRef } from "react";
 
-const BarcodeScanner = () => {
-    const baseURL = import.meta.env.VITE_API_BASE_URL;
+const BackCamera = () => {
     const videoRef = useRef(null);
-    const [scanning, setScanning] = useState(false);
-    const [barcode, setBarcode] = useState(null);
-    const [part, setPart] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const codeReader = useRef(null);
+    const streamRef = useRef(null);
 
-    const startScanner = async () => {
-        setScanning(true);
-        codeReader.current = new BrowserMultiFormatReader();
-
+    const startCamera = async () => {
         try {
-            await codeReader.current.decodeFromConstraints(
-                {
-                    video: {
-                        facingMode: { exact: "environment" } // back camera
-                    },
-                    audio: false
-                },
-                videoRef.current,
-                (result, error) => {
-                    if (result) {
-                        const scannedValue = result.getText();
-                        setBarcode(scannedValue);
-                        fetchPartDetails(scannedValue);
-                        stopScanner(); // or delay this if you want user to confirm
-                    }
-                }
-            );
-        } catch (err) {
-            console.error("Error accessing camera:", err);
-            setScanning(false);
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { exact: "environment" } }, // Back camera
+                audio: false,
+            });
+
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                videoRef.current.play();
+            }
+
+            streamRef.current = stream;
+        } catch (error) {
+            console.error("Failed to access camera:", error);
+            alert("Unable to access the back camera. Please allow camera permissions.");
         }
     };
 
-    const stopScanner = () => {
-        codeReader.current?.reset();
-        setScanning(false);
-    };
+    const stopCamera = () => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
 
-    const fetchPartDetails = async (barcodeImageName) => {
-        setLoading(true);
-        try {
-            const imageName = barcodeImageName.replace(/^.*[\\/]/, '');
-            const res = await axios.get(`${baseURL}/api/part/barcode/${imageName}`);
-            setPart(res.data);
-        } catch (err) {
-            console.error("Failed to fetch part:", err);
-            setPart(null);
-        } finally {
-            setLoading(false);
+        if (videoRef.current) {
+            videoRef.current.srcObject = null;
         }
     };
-
-    useEffect(() => {
-        return () => stopScanner();
-    }, []);
 
     return (
-        <div className="text-center space-y-4 p-4">
-            {!scanning ? (
-                <button
-                    onClick={startScanner}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md shadow"
-                >
-                    Scan Now
-                </button>
-            ) : (
-                <>
-                    <video
-                        ref={videoRef}
-                        className="w-full max-w-md mx-auto rounded-lg shadow bg-black"
-                        autoPlay
-                        muted
-                        playsInline
-                    />
-                    <button
-                        onClick={stopScanner}
-                        className="bg-red-500 text-white px-4 py-2 rounded-md shadow mt-2"
-                    >
-                        Stop Scanning
-                    </button>
-                </>
-            )}
+        <div className="p-4 text-center">
+            <button
+                onClick={startCamera}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md shadow"
+            >
+                Open Back Camera
+            </button>
 
-            {barcode && (
-                <div className="mt-4">
-                    ✅ <span className="text-green-600 font-semibold">Scanned Barcode:</span> {barcode}
-                </div>
-            )}
+            <div className="mt-4">
+                <video
+                    ref={videoRef}
+                    autoPlay
+                    muted
+                    playsInline
+                    className="w-full max-w-md mx-auto rounded-lg bg-black"
+                />
+            </div>
 
-            {loading && <p className="text-gray-500">Fetching part details...</p>}
-
-            {part && (
-                <div className="text-left max-w-xl mx-auto mt-4 border rounded-lg p-4 shadow space-y-2">
-                    <h2 className="text-lg font-semibold text-blue-700">🔍 Part Information</h2>
-                    <p><strong>Type:</strong> {part.partType}</p>
-                    <p><strong>Model:</strong> {part.model}</p>
-                    <p><strong>Brand:</strong> {part.brand}</p>
-                    <p><strong>Serial Number:</strong> {part.serialNumber}</p>
-                    <p><strong>Status:</strong> <span className={part.status === "Active" ? "text-green-600" : "text-red-600"}>{part.status}</span></p>
-                    <p><strong>Notes:</strong> {part.notes || "N/A"}</p>
-                    <p><strong>Barcode:</strong> {part.barcode}</p>
-                    <img
-                        src={`${baseURL}/${part.barcodeImage}`}
-                        alt="Barcode"
-                        className="w-[200px] mt-2"
-                    />
-                    <p><strong>Specs:</strong></p>
-                    <ul className="list-disc ml-5">
-                        {part.specs?.map((spec) => (
-                            <li key={spec._id}>{spec.key}: {spec.value}</li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-
-            {barcode && !part && !loading && (
-                <div className="text-red-500">No part found for this barcode.</div>
-            )}
+            <button
+                onClick={stopCamera}
+                className="mt-4 bg-red-600 text-white px-4 py-2 rounded-md shadow"
+            >
+                Stop Camera
+            </button>
         </div>
     );
 };
 
-export default BarcodeScanner;
+export default BackCamera;
