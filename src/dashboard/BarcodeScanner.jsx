@@ -6,6 +6,7 @@ const BackCamera = () => {
     const [cameraOpen, setCameraOpen] = useState(false);
 
     const startCamera = async () => {
+        setCameraOpen(true);
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: { exact: "environment" } }, // Back camera
@@ -25,6 +26,7 @@ const BackCamera = () => {
     };
 
     const stopCamera = () => {
+        setCameraOpen(false);
         if (streamRef.current) {
             streamRef.current.getTracks().forEach(track => track.stop());
             streamRef.current = null;
@@ -43,27 +45,27 @@ const BackCamera = () => {
                     autoPlay
                     muted
                     playsInline
-                    className="w-full max-w-md mx-auto rounded-lg bg-black"
+                    className="w-full mb-2 max-w-md mx-auto rounded-lg bg-black"
                 />
             </div>
 
             {cameraOpen ? (
                 <button
                     onClick={stopCamera}
-                    className="mt-4 bg-red-600 text-white px-4 py-2 rounded-md shadow"
+                    className="mt-4 bg-red-600 text-white px-2 py-2 rounded-md shadow"
                 >
                     Stop Camera
                 </button>
-            ):(
-            <button
-                onClick={startCamera}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md shadow"
-            >
-                Open Back Camera
-            </button>
+            ) : (
+                <button
+                    onClick={startCamera}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md shadow"
+                >
+                    Open Back Camera
+                </button>
             )}
-           
-            
+
+
         </div>
     );
 };
