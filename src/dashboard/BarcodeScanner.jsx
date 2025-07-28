@@ -10,48 +10,37 @@ const BarcodeScanner = () => {
     const [part, setPart] = useState(null);
     const [loading, setLoading] = useState(false);
     const codeReader = useRef(null);
-    const mediaStream = useRef(null); // store stream for manual cleanup
 
     const startScanner = async () => {
         setScanning(true);
         codeReader.current = new BrowserMultiFormatReader();
 
-        const previewElem = videoRef.current;
-
         try {
-            // Manual fallback to show live feed if decode fails to attach video
-            const constraints = {
-                video: {
-                    facingMode: { exact: "environment" }
+            await codeReader.current.decodeFromConstraints(
+                {
+                    video: {
+                        facingMode: { exact: "environment" } // back camera
+                    },
+                    audio: false
                 },
-                audio: false
-            };
-
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
-            previewElem.srcObject = stream;
-            previewElem.play();
-            mediaStream.current = stream;
-
-            await codeReader.current.decodeFromVideoDevice(null, previewElem, (result, error) => {
-                if (result) {
-                    const scannedValue = result.getText();
-                    setBarcode(scannedValue);
-                    fetchPartDetails(scannedValue);
-                    stopScanner();
+                videoRef.current,
+                (result, error) => {
+                    if (result) {
+                        const scannedValue = result.getText();
+                        setBarcode(scannedValue);
+                        fetchPartDetails(scannedValue);
+                        stopScanner(); // or delay this if you want user to confirm
+                    }
                 }
-            });
+            );
         } catch (err) {
-            console.error("Error starting scanner:", err);
+            console.error("Error accessing camera:", err);
             setScanning(false);
         }
     };
 
     const stopScanner = () => {
         codeReader.current?.reset();
-        if (mediaStream.current) {
-            mediaStream.current.getTracks().forEach(track => track.stop());
-            mediaStream.current = null;
-        }
         setScanning(false);
     };
 
@@ -70,9 +59,7 @@ const BarcodeScanner = () => {
     };
 
     useEffect(() => {
-        return () => {
-            stopScanner(); // Cleanup on unmount
-        };
+        return () => stopScanner();
     }, []);
 
     return (
@@ -121,7 +108,7 @@ const BarcodeScanner = () => {
                     <p><strong>Notes:</strong> {part.notes || "N/A"}</p>
                     <p><strong>Barcode:</strong> {part.barcode}</p>
                     <img
-                        src={`http://localhost:5000/${part.barcodeImage}`}
+                        src={`${baseURL}/${part.barcodeImage}`}
                         alt="Barcode"
                         className="w-[200px] mt-2"
                     />
