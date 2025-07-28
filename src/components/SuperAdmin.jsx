@@ -72,8 +72,13 @@ const SuperAdmin = () => {
     }
 
     if (!authorized) {
-        navigate("/");
-        return null;
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+                <h1 className="text-2xl font-semibold text-red-500">
+                    Unauthorized access
+                </h1>
+            </div>
+        );
     }
 
     const getAllEmployee = async () => {
