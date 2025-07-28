@@ -247,6 +247,7 @@ const EmployeeList = () => {
                                                     <p><strong>Status:</strong> <span className={part.status === "Active" ? "text-green-600" : "text-red-600"}>{part.status}</span></p>
                                                     <p><strong>Serial No:</strong> {part.serialNumber}</p>
                                                     <p><strong>Barcode:</strong> {part.barcode}</p>
+                                                    <img src={`http://localhost:5000/${part.barcodeImage}`} className='w-[90%]' alt="barcode" />
                                                     <hr className="my-2 border-gray-300" />
                                                 </li>
                                             ))}

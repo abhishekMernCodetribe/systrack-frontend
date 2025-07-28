@@ -279,6 +279,7 @@ const SystemListPage = () => {
                                 </p>
                                 <p><strong>Unusable Reason:</strong> {part.unusableReason ?? "N/A"}</p>
                                 <p><strong>Barcode:</strong> {part.barcode ?? "N/A"}</p>
+                                <img src={`http://localhost:5000/${part.barcodeImage}`} className='w-[90%]' alt="barcode" />
                                 <p><strong>Serial Number:</strong> {part.serialNumber ?? "N/A"}</p>
                                 <p><strong>Notes:</strong> {part.notes || 'N/A'}</p>
                                 {part.specs?.length > 0 ? (

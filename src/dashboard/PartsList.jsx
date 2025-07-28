@@ -176,6 +176,7 @@ const PartsList = () => {
                         <p><strong>Status:</strong> <span className={selectedPart.status === "Active" ? "text-green-600" : "text-red-600"}>{selectedPart.status ?? "N/A"}</span></p>
                         <p><strong>Unusable Reason:</strong> {selectedPart.unusableReason ?? "N/A"}</p>
                         <p><strong>Barcode:</strong> {selectedPart.barcode ?? "N/A"}</p>
+                        <img src={`http://localhost:5000/${selectedPart.barcodeImage}`} className='w-[90%]' alt="barcode" />
                         <p><strong>Serial Number:</strong> {selectedPart.serialNumber}</p>
                         <p><strong>Notes:</strong> {selectedPart.notes || 'N/A'}</p>
                         <p><strong>Specs:</strong></p>
