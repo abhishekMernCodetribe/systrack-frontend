@@ -160,7 +160,6 @@ const SuperAdmin = () => {
                         <HiMiniCpuChip className="text-lg" />
                         <span>Parts</span>
                     </NavLink>
-
                     <NavLink
                         to="/superadmin/employees"
                         onClick={() => {
@@ -174,6 +173,20 @@ const SuperAdmin = () => {
                     >
                         <BsFillPeopleFill className="text-lg" />
                         <span>Employees</span>
+                    </NavLink>
+
+                    <NavLink
+                        to="/superadmin/barcode"
+                        onClick={() => {
+                            setIsSidebarOpen(false);
+                        }}
+                        className={({ isActive }) =>
+                            `flex items-center gap-2 text-sm px-4 py-2 rounded hover:bg-gray-700 ${isActive ? "bg-blue-600 font-semibold" : ""
+                            }`
+                        }
+                    >
+                        <HiMiniCpuChip className="text-lg" />
+                        <span>Scan barcode</span>
                     </NavLink>
                 </nav>
 

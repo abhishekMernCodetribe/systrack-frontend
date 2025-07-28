@@ -8,6 +8,7 @@ import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import SystemListPage from "./dashboard/SystemListPage";
 import EmployeeList from "./dashboard/EmployeeList";
 import PartsList from "./dashboard/PartsList";
+import BarcodeScanner from "./dashboard/BarcodeScanner";
 
 const App = () => {
   return (
@@ -30,6 +31,7 @@ const App = () => {
             <Route path="systems" element={<SystemListPage />} />
             <Route path="employees" element={<EmployeeList />} />
             <Route path="parts" element={<PartsList />} />
+            <Route path="barcode" element={<BarcodeScanner />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/login" replace />} />
