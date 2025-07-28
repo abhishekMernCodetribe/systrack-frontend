@@ -1,14 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "../auth/AuthContext";
 
 const Login = () => {
   const baseURL = import.meta.env.VITE_API_BASE_URL;
   const [data, setData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, token, role } = useAuth();
+
+  useEffect(() => {
+    if (token) {
+      navigate(role === "superadmin" ? "/superadmin" : "/", { replace: true });
+    }
+  }, [token, role, navigate]);
 
   const handleChange = (e) =>
     setData({ ...data, [e.target.name]: e.target.value });

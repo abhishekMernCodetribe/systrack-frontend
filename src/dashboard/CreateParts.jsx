@@ -7,6 +7,8 @@ import { useParts } from "../context/PartsContext";
 const CreateParts = ({ onClose }) => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
     const { parts, setParts } = useParts();
+    const [specError, setSpecError] = useState('');
+
     const [formData, setFormData] = useState({
         partType: '',
         brand: '',
@@ -22,18 +24,31 @@ const CreateParts = ({ onClose }) => {
     const [specInput, setSpecInput] = useState({ key: '', value: '' });
     const [errors, setErrors] = useState({});
 
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const addSpec = () => {
+        const { key, value } = specInput;
+
+        if ((key && !value) || (!key && value)) {
+            setSpecError("Both Spec Key and Spec Value must be filled.");
+            return;
+        }
+
+        if (!key && !value) {
+            setSpecError("Please fill in both fields before adding.");
+            return;
+        }
         if (specInput.key && specInput.value) {
             setFormData(prev => ({
                 ...prev,
                 specs: [...prev.specs, { ...specInput }]
             }));
             setSpecInput({ key: '', value: '' });
+            setSpecError('');
         }
     };
 
@@ -44,8 +59,6 @@ const CreateParts = ({ onClose }) => {
         } catch (err) {
             console.log(err);
             setErrors('Failed to fetch parts');
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -235,6 +248,7 @@ const CreateParts = ({ onClose }) => {
                                 + Add
                             </button>
                         </div>
+                        {specError && <p className="text-red-500 text-sm">{specError}</p>}
                         {formData.specs.length > 0 && (
                             <ul className="text-sm text-gray-700 space-y-1">
                                 {formData.specs.map((spec, idx) => (

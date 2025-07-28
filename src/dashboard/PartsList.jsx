@@ -67,6 +67,15 @@ const PartsList = () => {
 
     const handleUpdatePart = async () => {
         try {
+            const invalidSpec = selectedPart.specs?.some(
+                (spec) => !spec.key?.trim() || !spec.value?.trim()
+            );
+
+            if (invalidSpec) {
+                toast.error("Each spec must have both a key and a value.");
+                return;
+            }
+
             setErrors({});
             const res = await axios.put(
                 `${baseURL}/api/part/${selectedPart._id}`,
@@ -74,11 +83,12 @@ const PartsList = () => {
             );
             handleClose();
             toast.success(res.data.message);
-            fetchParts(); // reload updated data
+            fetchParts();
         } catch (err) {
             if (err.response && err.response.data && err.response.data.errors) {
                 setErrors(err.response.data.errors);
             } else {
+                toast.error("Specs should not be empty");
                 console.error("Unexpected error:", err);
             }
             console.error(err);
@@ -180,11 +190,19 @@ const PartsList = () => {
                         <p><strong>Serial Number:</strong> {selectedPart.serialNumber}</p>
                         <p><strong>Notes:</strong> {selectedPart.notes || 'N/A'}</p>
                         <p><strong>Specs:</strong></p>
-                        <ul className="list-disc ml-5">
-                            {selectedPart?.specs?.map((spec) => (
-                                <li key={spec._id}>{spec.key}: {spec.value}</li>
-                            ))}
-                        </ul>
+                        {selectedPart?.specs && selectedPart.specs.length > 0 ? (
+                            <ul className="list-disc ml-5">
+                                {selectedPart.specs.map((spec, index) => (
+                                    <li key={spec._id || index}>
+                                        {spec.key}: {spec.value}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-gray-500">No specifications added</p>
+                        )}
+                        <p><strong>Created At:</strong> {new Date(selectedPart.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</p>
+                        <p><strong>Updated At:</strong> {new Date(selectedPart.updatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</p>
                     </div>
                 </Modal>
             )}
@@ -195,16 +213,24 @@ const PartsList = () => {
                         {/* Part Type */}
                         <div>
                             <label className="block font-semibold mb-1">Part Type</label>
-                            <input
+                            <select
                                 ref={partTypeRef}
-                                type="text"
-                                className={`w-full p-2 border rounded-lg ${errors.partType ? 'border-red-500' : ''}`}
-                                placeholder="Part Type"
-                                value={selectedPart.partType}
+                                name="partType"
                                 onChange={(e) =>
-                                    setSelectedPart({ ...selectedPart, partType: e.target.value })
-                                }
-                            />
+                                    setSelectedPart({ ...selectedPart, partType: e.target.value })}
+                                value={selectedPart.partType}
+                                className={`w-full p-2 border rounded-lg ${errors.partType ? 'border-red-500' : ''}`}
+                                required
+                            >
+                                <option value="">Select Part Type</option>
+                                <option value="RAM">RAM</option>
+                                <option value="CPU">CPU</option>
+                                <option value="HDD">HDD</option>
+                                <option value="SSD">SSD</option>
+                                <option value="Monitor">Monitor</option>
+                                <option value="Printer">Printer</option>
+                                <option value="Headphone">Headphone</option>
+                            </select>
                             {errors.partType && <p className="text-red-500 text-sm">{errors.partType}</p>}
                         </div>
 
@@ -324,8 +350,14 @@ const PartsList = () => {
                                 type='button'
                                 className='mt-2 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700'
                                 onClick={() => {
-                                    const updatedSpecs = [...(selectedPart.specs || []), { key: '', value: '' }];
-                                    setSelectedPart({ ...selectedPart, specs: updatedSpecs })
+                                    const specs = selectedPart.specs || [];
+                                    const lastSpec = specs[specs.length - 1];
+                                    if (lastSpec && (!lastSpec.key || !lastSpec.value)) {
+                                        return;
+                                    }
+
+                                    const updatedSpecs = [...specs, { key: '', value: '' }];
+                                    setSelectedPart({ ...selectedPart, specs: updatedSpecs });
                                 }}
                             >
                                 + Add Spec

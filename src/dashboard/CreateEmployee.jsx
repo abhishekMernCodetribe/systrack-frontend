@@ -23,7 +23,7 @@ const CreateEmployee = ({ onClose }) => {
 
         if (name === 'phone') {
             if (!/^\d*$/.test(value)) return;
-            if (value.length > 10) return;    
+            if (value.length > 10) return;
         }
 
         if (name === 'department') {
@@ -34,10 +34,10 @@ const CreateEmployee = ({ onClose }) => {
             ...prev,
             [name]: value
         }));
-        
+
     };
 
-    useEffect(()=>{
+    useEffect(() => {
         console.log(newEmployee);
     }, [newEmployee])
 
@@ -47,7 +47,7 @@ const CreateEmployee = ({ onClose }) => {
         e.preventDefault();
         try {
             setErrors({});
-            const res = await axios.post(`${base}/api/employee`, newEmployee);
+            const res = await axios.post(`${baseURL}/api/employee`, newEmployee);
             if (res.status === 201) {
                 setEmployees((prev) => [...prev, res.data]);
                 toast.success(res.data.message || "Employee created successfully");

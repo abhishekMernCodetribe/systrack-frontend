@@ -300,10 +300,10 @@ const EmployeeList = () => {
                                 <input
                                     type="text"
                                     name="department"
-                                    className={`w-full p-2 border rounded-lg ${errors.department ? 'border-red-500' : ''}`}
+                                    className={`w-full p-2 border rounded-lg bg-gray-200 ${errors.department ? 'border-red-500' : ''}`}
                                     value={editForm.department}
-                                    onChange={handleEditChange}
                                     required
+                                    disabled
                                 />
                                 {errors.department && <p className="text-red-500 text-sm">{errors.department}</p>}
                             </div>

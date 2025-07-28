@@ -1,7 +1,17 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
 const Home = () => {
   const navigate = useNavigate();
+  const { token, role } = useAuth();
+
+  // 🔒 Redirect if user is already logged in
+  useEffect(() => {
+    if (token) {
+      navigate(role === "superadmin" ? "/superadmin" : "/", { replace: true });
+    }
+  }, [token, role, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
