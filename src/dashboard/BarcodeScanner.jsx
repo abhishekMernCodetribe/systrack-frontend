@@ -1,8 +1,9 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 
 const BackCamera = () => {
     const videoRef = useRef(null);
     const streamRef = useRef(null);
+    const [cameraOpen, setCameraOpen] = useState(false);
 
     const startCamera = async () => {
         try {
@@ -36,13 +37,6 @@ const BackCamera = () => {
 
     return (
         <div className="p-4 text-center">
-            <button
-                onClick={startCamera}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md shadow"
-            >
-                Open Back Camera
-            </button>
-
             <div className="mt-4">
                 <video
                     ref={videoRef}
@@ -53,12 +47,23 @@ const BackCamera = () => {
                 />
             </div>
 
+            {cameraOpen ? (
+                <button
+                    onClick={stopCamera}
+                    className="mt-4 bg-red-600 text-white px-4 py-2 rounded-md shadow"
+                >
+                    Stop Camera
+                </button>
+            ):(
             <button
-                onClick={stopCamera}
-                className="mt-4 bg-red-600 text-white px-4 py-2 rounded-md shadow"
+                onClick={startCamera}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md shadow"
             >
-                Stop Camera
+                Open Back Camera
             </button>
+            )}
+           
+            
         </div>
     );
 };
