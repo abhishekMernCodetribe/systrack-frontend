@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -14,6 +14,10 @@ import isEqual from "lodash.isequal";
 const EmployeeList = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
     const { employees, setEmployees } = useEmployees();
+    useEffect(() => {
+        fetchEmployees();
+    }, []);
+
     const navigate = useNavigate();
     const [openMenuId, setOpenMenuId] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -22,6 +26,13 @@ const EmployeeList = () => {
     const [openModal, setOpenModal] = useState(null);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [errors, setErrors] = useState({});
+
+    const [searchText, setSearchText] = useState('');
+    const filteredEmployees = useMemo(() => {
+        return employees.filter(emp =>
+            emp.email.toLowerCase().includes(searchText.toLowerCase())
+        );
+    }, [employees, searchText]);
 
     const [editForm, setEditForm] = useState({
         name: '',
@@ -137,10 +148,6 @@ const EmployeeList = () => {
         }
     };
 
-    useEffect(() => {
-        fetchEmployees();
-    }, []);
-
     const handleDelete = async () => {
         try {
             if (!selectedEmployee._id) return;
@@ -183,6 +190,15 @@ const EmployeeList = () => {
             {showModal && <CreateEmployee onClose={() => setShowModal(false)} />}
 
             <div className="overflow-x-auto border rounded-lg shadow">
+                <div className="flex flex-wrap m-2 items-center gap-4">
+                    <input
+                        type="text"
+                        placeholder="Search by email"
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        className="border rounded px-3 py-2 text-sm w-64"
+                    />
+                </div>
                 <table className="min-w-full divide-y divide-gray-200 text-sm">
                     <thead className="bg-gray-100 text-gray-600 text-left">
                         <tr>
@@ -193,25 +209,34 @@ const EmployeeList = () => {
                         </tr>
                     </thead>
                     <tbody className="text-gray-700">
-                        {(employees.length == 0 && !loading) ? <tr><td colSpan={4} className="text-center py-4 text-gray-500 text-2xl">No Employees found</td></tr> : employees.map((emp) => (
-                            <tr key={emp._id} className="border-b hover:bg-gray-50">
-                                <td className="py-2 px-4">{emp.name}</td>
-                                <td className="py-2 px-4">{emp.email}</td>
-                                <td className="py-2 px-4">{emp.phone}</td>
-                                <td className="py-2 px-4 text-center space-x-2">
-                                    <button onClick={() => handleOpen("view", emp)}>
-                                        <UilEye className="text-blue-600 hover:text-blue-800" />
-                                    </button>
-                                    <button onClick={() => handleOpen("edit", emp)}>
-                                        <UilEdit className="text-green-600 hover:text-green-800" />
-                                    </button>
-                                    <button onClick={() => handleOpen("delete", emp)}>
-                                        <UilTrashAlt className="text-red-600 hover:text-red-800" />
-                                    </button>
+                        {(filteredEmployees?.length === 0 && !loading) ? (
+                            <tr>
+                                <td colSpan={4} className="text-center py-4 text-gray-500 text-2xl">
+                                    No Employees found
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            filteredEmployees.map((emp) => (
+                                <tr key={emp._id} className="border-b hover:bg-gray-50">
+                                    <td className="py-2 px-4">{emp.name}</td>
+                                    <td className="py-2 px-4">{emp.email}</td>
+                                    <td className="py-2 px-4">{emp.phone}</td>
+                                    <td className="py-2 px-4 text-center space-x-2">
+                                        <button onClick={() => handleOpen("view", emp)}>
+                                            <UilEye className="text-blue-600 hover:text-blue-800" />
+                                        </button>
+                                        <button onClick={() => handleOpen("edit", emp)}>
+                                            <UilEdit className="text-green-600 hover:text-green-800" />
+                                        </button>
+                                        <button onClick={() => handleOpen("delete", emp)}>
+                                            <UilTrashAlt className="text-red-600 hover:text-red-800" />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
+
                 </table>
             </div>
 

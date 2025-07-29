@@ -9,6 +9,10 @@ import SystemListPage from "./dashboard/SystemListPage";
 import EmployeeList from "./dashboard/EmployeeList";
 import PartsList from "./dashboard/PartsList";
 import BarcodeScanner from "./dashboard/BarcodeScanner";
+import AllocatedSystems from "./dashboard/AllocatedSystems";
+import UnallocatedSystems from "./dashboard/UnallocatedSystems";
+import ActiveParts from "./dashboard/ActiveParts";
+import UnusableParts from "./dashboard/UnusableParts";
 
 const App = () => {
   return (
@@ -30,6 +34,10 @@ const App = () => {
             <Route index element={<SuperAdminDashboard />} />
             <Route path="systems" element={<SystemListPage />} />
             <Route path="employees" element={<EmployeeList />} />
+            <Route path="allocatedSystems" element={<AllocatedSystems />} />
+            <Route path="unallocatedSystems" element={<UnallocatedSystems />} />
+            <Route path="activeParts" element={<ActiveParts />} />
+            <Route path="unusableParts" element={<UnusableParts />} />
             <Route path="parts" element={<PartsList />} />
             <Route path="barcode" element={<BarcodeScanner />} />
           </Route>

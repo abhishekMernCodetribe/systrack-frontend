@@ -8,6 +8,7 @@ import { useSystems } from '../context/SystemContext.jsx';
 import { useParts } from '../context/PartsContext.jsx';
 import { FaBars, FaComputer } from "react-icons/fa6";
 import { HiMiniCpuChip } from "react-icons/hi2";
+import { BiBarcodeReader } from "react-icons/bi";
 import { BsFillPeopleFill } from "react-icons/bs";
 
 const SuperAdmin = () => {
@@ -77,7 +78,7 @@ const SuperAdmin = () => {
                 <h1 className="text-2xl font-semibold text-red-500">
                     Unauthorized access
                 </h1>
-                <LogoutButton/>
+                <LogoutButton />
             </div>
         );
     }
@@ -186,7 +187,7 @@ const SuperAdmin = () => {
                             }`
                         }
                     >
-                        <HiMiniCpuChip className="text-lg" />
+                        <BiBarcodeReader className="text-lg" />
                         <span>Scan barcode</span>
                     </NavLink>
                 </nav>

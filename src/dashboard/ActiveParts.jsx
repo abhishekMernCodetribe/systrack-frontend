@@ -10,16 +10,17 @@ import {
 } from "@iconscout/react-unicons";
 import { toast } from 'react-toastify';
 
-const PartsList = () => {
+const ActiveParts = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
-    const { parts } = useParts();
-    const [part, setPart] = useState([]);
 
-    const [page, setPage] = useState(1);
+    const { parts, setParts } = useParts();
+    useEffect(() => {
+        fetchParts();
+    }, []);
 
-    const [limit, setLimit] = useState(2);
-    const [totalPages, setTotalPages] = useState(0);
-
+    const activeParts = useMemo(() => {
+        return parts?.filter(part => part.status === 'Active');
+    }, [parts]);
 
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -32,22 +33,19 @@ const PartsList = () => {
     const [searchText, setSearchText] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
 
+    const filteredParts = useMemo(() => {
+        return activeParts?.filter((part) => {
+            const matchesStatus = statusFilter ? part.status === statusFilter : true;
+            const matchesName = part.partType.toLowerCase().includes(searchText.toLowerCase());
+            return matchesStatus && matchesName;
+        });
+    }, [parts, searchText, statusFilter]);
+
     const partTypeRef = useRef();
     const barcodeRef = useRef();
     const serialRef = useRef();
     const brandRef = useRef();
     const modelRef = useRef();
-
-    useEffect(() => {
-        fetchParts();
-    }, [statusFilter, page, limit]);
-
-    useEffect(() => {
-        const delay = setTimeout(() => {
-            fetchParts();
-        }, 500);
-        return () => clearTimeout(delay);
-    }, [searchText]);
 
     useEffect(() => {
         if (errors.partType) {
@@ -118,35 +116,27 @@ const PartsList = () => {
     };
 
     const fetchParts = async () => {
-        setLoading(true);
         try {
-            const res = await axios.get(`${baseURL}/api/part`, {
-                params: {
-                    search: searchText,
-                    status: statusFilter,
-                    page,
-                    limit
-                }
-            });
-            setPart(res.data.parts);
-            setTotalPages(res.data.totalPages);
+            const res = await axios.get(`${baseURL}/api/part`);
+            setParts(res.data.parts);
         } catch (err) {
-            setPart([]);
             console.log(err);
-            //setError('Failed to fetch parts');
+            setError('Failed to fetch parts');
         } finally {
             setLoading(false);
         }
     };
 
-    // if (loading) return <p className="text-gray-500">Loading parts...</p>;
+    
+
+    if (loading) return <p className="text-gray-500">Loading parts...</p>;
     if (error) return <p className="text-red-500">{error}</p>;
 
     return (
         <div className="w-full px-4 py-4">
             <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
                 <h2 className="text-2xl font-bold text-gray-800">
-                    Total Parts ({parts?.length})
+                    Total Active Parts ({activeParts?.length > 0 ? activeParts.length : '0'})
                 </h2>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-start sm:items-center">
                     <button
@@ -164,20 +154,15 @@ const PartsList = () => {
                 </div>
             </div>
 
-            {showModal && <CreateParts onClose={() => setShowModal(false)} />}
-
             <div className="overflow-x-auto border rounded-lg shadow">
                 <div className="space-y-4">
                     {/* Filter Controls */}
-                    <div className="flex flex-wrap m-2 items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-4">
                         <input
                             type="text"
                             placeholder="Search by part name"
                             value={searchText}
-                            onChange={(e) => {
-                                setSearchText(e.target.value);
-                                setPage(1);
-                            }}
+                            onChange={(e) => setSearchText(e.target.value)}
                             className="border rounded px-3 py-2 text-sm w-64"
                         />
                         <select
@@ -185,7 +170,6 @@ const PartsList = () => {
                             onChange={(e) => setStatusFilter(e.target.value)}
                             className="border rounded px-3 py-2 text-sm"
                         >
-
                             <option value="">All Statuses</option>
                             <option value="Active">Active</option>
                             <option value="Unusable">Unusable</option>
@@ -193,7 +177,7 @@ const PartsList = () => {
                     </div>
 
                     {/* Table */}
-                    <div className="overflow-x-auto flex flex-col justify-between h-[70vh]">
+                    <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200 text-sm">
                             <thead className="bg-gray-100 text-gray-600 text-left">
                                 <tr>
@@ -205,14 +189,14 @@ const PartsList = () => {
                                 </tr>
                             </thead>
                             <tbody className="text-gray-700">
-                                {!loading && part?.length === 0 ? (
+                                {filteredParts.length === 0 && !loading ? (
                                     <tr>
                                         <td colSpan={5} className="text-center py-4 text-gray-500 text-2xl">
                                             No parts found
                                         </td>
                                     </tr>
                                 ) : (
-                                    part?.map((part) => (
+                                    filteredParts.map((part) => (
                                         <tr key={part._id} className="border-b hover:bg-gray-50">
                                             <td className="py-2 px-4">{part.partType}</td>
                                             <td className="py-2 px-4">{part.model}</td>
@@ -238,46 +222,6 @@ const PartsList = () => {
                                 )}
                             </tbody>
                         </table>
-
-                        <div className="flex justify-center  my-4 space-x-2">
-                            <button
-                                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                                disabled={page === 1}
-                                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                            >
-                                Prev
-                            </button>
-                            {Array.from({ length: totalPages }, (_, i) => (
-                                <button
-                                    key={i + 1}
-                                    onClick={() => setPage(i + 1)}
-                                    className={`px-3 py-1 rounded ${page === i + 1 ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
-                                >
-                                    {i + 1}
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-                                disabled={page === totalPages}
-                                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                            >
-                                Next
-                            </button>
-                            <select
-                                value={limit}
-                                onChange={(e) => {
-                                    setLimit(Number(e.target.value));
-                                    setPage(1);
-                                }}
-                                className="ml-4 px-2 py-1 border rounded text-sm"
-                            >
-                                {[2, 4, 6, 8, 10].map((num) => (
-                                    <option key={num} value={num}>
-                                        {num} / page
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -547,7 +491,7 @@ const PartsList = () => {
                 </Modal>
             )}
         </div>
-    );
+    )
 };
 
 const Modal = ({ title, children, onClose }) => {
@@ -564,4 +508,4 @@ const Modal = ({ title, children, onClose }) => {
     );
 };
 
-export default PartsList;
+export default ActiveParts

@@ -9,15 +9,19 @@ const SuperAdminDashboard = () => {
   const baseURL = import.meta.env.VITE_API_BASE_URL;
   const [stats, setStats] = useState({
     totalSystems: 0,
+    allocatedSystems: 0,
+    unallocatedSystems: 0,
     totalParts: 0,
+    activeParts: 0,
+    unusableParts: 0,
     totalEmployees: 0,
   });
 
   const navigate = useNavigate();
 
-  const {setEmployees } = useEmployees();
-  const {setSystems } = useSystems();
-  const {setParts } = useParts()
+  const { setEmployees } = useEmployees();
+  const { setSystems } = useSystems();
+  const { setParts } = useParts()
 
   const fetchStats = async () => {
     try {
@@ -45,9 +49,25 @@ const SuperAdminDashboard = () => {
         endpoint = '/api/part';
         setter = setParts;
         break;
+      case 'activeParts':
+        endpoint = '/api/part';
+        setter = setParts;
+        break;
+      case 'unusableParts':
+        endpoint = '/api/part';
+        setter = setParts;
+        break;
       case 'employees':
         endpoint = '/api/employee/allemployee';
         setter = setEmployees;
+        break;
+      case 'allocatedSystems':
+        endpoint = '/api/system/allsys';
+        setter = setSystems;
+        break;
+      case 'unallocatedSystems':
+        endpoint = '/api/system/allsys';
+        setter = setSystems;
         break;
       default:
         return;
@@ -56,8 +76,8 @@ const SuperAdminDashboard = () => {
     try {
       const res = await axios.get(`${baseURL}${endpoint}`);
       if (type == 'employees') setEmployees(res.data[type]);
-      else if (type == 'parts') setParts(res.data[type]);
-      else if (type == 'systems') setSystems(res.data[type]);
+      else if (type == 'parts' || type === 'activeParts' || type === 'unusableParts') setParts(res.data[type]);
+      else if (type == 'systems' || type == 'allocatedSystems') setSystems(res.data[type]);
       navigate(`${type}`);
     } catch (error) {
       console.error(`Error fetching ${type}:`, error);
@@ -68,6 +88,10 @@ const SuperAdminDashboard = () => {
     { label: 'Total Systems', value: stats.totalSystems, key: 'systems', color: 'bg-blue-500' },
     { label: 'Total Parts', value: stats.totalParts, key: 'parts', color: 'bg-green-500' },
     { label: 'Total Employees', value: stats.totalEmployees, key: 'employees', color: 'bg-purple-500' },
+    { label: 'Allocated Systems', value: stats.allocatedSystems, key: 'allocatedSystems', color: 'bg-blue-500' },
+    { label: 'Unallocated Systems', value: stats.unallocatedSystems, key: 'unallocatedSystems', color: 'bg-blue-500' },
+    { label: 'Active Parts', value: stats.activeParts, key: 'activeParts', color: 'bg-green-500' },
+    { label: 'Unusable Parts', value: stats.unusableParts, key: 'unusableParts', color: 'bg-green-500' },
   ];
 
   return (

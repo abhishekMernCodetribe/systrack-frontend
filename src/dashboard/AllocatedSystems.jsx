@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSystems } from '../context/SystemContext';
 import axios from 'axios';
@@ -6,17 +6,18 @@ import {
     UilEye,
     UilEdit
 } from "@iconscout/react-unicons";
-import CreateSystem from './CreateSystem';
 import { toast } from 'react-toastify';
 
-const SystemListPage = () => {
+const AllocatedSystems = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
     const { systems, setSystems } = useSystems();
+    const assignedSystems = useMemo(() => {
+        return systems?.filter(system => system.status === 'assigned');
+    }, [systems]);
     const [selectedSystem, setSelectedSystem] = useState(null);
 
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const [showModal, setShowModal] = useState(false);
     const [error, setError] = useState(null);
     const [openModal, setOpenModal] = useState(null);
     const [errors, setErrors] = useState({});
@@ -86,10 +87,6 @@ const SystemListPage = () => {
     }
 
     useEffect(() => {
-        fetchSystems();
-    }, []);
-
-    useEffect(() => {
         fetchUnassignedEmployees();
         fetchFreeParts();
     }, [systems, selectedSystem])
@@ -102,6 +99,22 @@ const SystemListPage = () => {
             console.error("Failed to fetch Unassigned employees:", error);
         }
     }
+
+    const fetchSystems = async () => {
+        try {
+            const res = await axios.get(`${baseURL}/api/system/allsys`);
+            setSystems(res.data.systems);
+        } catch (err) {
+            console.log(err);
+            setError('Failed to fetch parts');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchSystems();
+    }, []);
 
     const fetchFreeParts = async () => {
         try {
@@ -116,24 +129,11 @@ const SystemListPage = () => {
         }
     };
 
-    const fetchSystems = async () => {
-        try {
-            const res = await axios.get(`${baseURL}/api/system/allsys`);
-            setSystems(res.data.systems);
-        } catch (err) {
-            console.log(err);
-            setError('Failed to fetch parts');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const handleRemovePartFromSystem = async (partId) => {
         try {
             await axios.put(`${baseURL}/api/system/${selectedSystem._id}/remove-part/${partId}`);
             setExistingParts(prev => prev.filter(p => p._id !== partId));
             fetchFreeParts();
-            fetchSystems();
             toast.success("Part removed success");
         } catch (err) {
             console.error("Failed to remove part:", err);
@@ -145,12 +145,11 @@ const SystemListPage = () => {
         try {
             if (!selectedSystem?._id) return;
             const res = await axios.patch(`${baseURL}/api/system/unassign/${selectedSystem._id}`);
-            fetchSystems();
             setSelectedSystem(null);
+            fetchSystems();
             toast.success(res.data.message);
         } catch (error) {
             console.error("Error deleting part:", error);
-            toast.error("Failed to delete part.");
         }
     }
 
@@ -166,8 +165,6 @@ const SystemListPage = () => {
             });
 
             toast.success(res.data.message);
-            fetchSystems();
-            // handleClose();
         } catch (err) {
             console.error("Assignment error:", err);
             toast.error("Failed to assign system.");
@@ -182,8 +179,8 @@ const SystemListPage = () => {
                 name: selectedSystem.name,
                 parts: selectedPartIds
             });
-            fetchSystems();
             toast.success(res.data.message);
+            fetchSystems();
             handleClose();
         } catch (err) {
             console.log(err);
@@ -204,15 +201,9 @@ const SystemListPage = () => {
         <div className="w-full px-4 py-4">
             <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
                 <h2 className="text-2xl font-bold text-gray-800">
-                    Total Systems ({systems.length > 0 ? systems.length : '0'})
+                    Total Allocated Systems ({assignedSystems?.length > 0 ? assignedSystems.length : '0'})
                 </h2>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-start sm:items-center">
-                    <button
-                        onClick={() => setShowModal(true)}
-                        className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded shadow hover:from-blue-600 hover:to-indigo-700"
-                    >
-                        + Add New System
-                    </button>
                     <button
                         onClick={() => navigate('/superadmin')}
                         className="text-sm text-blue-600 hover:underline"
@@ -221,8 +212,6 @@ const SystemListPage = () => {
                     </button>
                 </div>
             </div>
-
-            {showModal && <CreateSystem onClose={() => setShowModal(false)} />}
 
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 border rounded-lg shadow text-sm">
@@ -237,13 +226,13 @@ const SystemListPage = () => {
                     </thead>
 
                     <tbody className="text-gray-700">
-                        {(systems.length == 0 && !loading) ? <tr><td colSpan={4} className="text-center py-4 text-gray-500 text-2xl">No system found</td></tr> : systems.map((system) => (
+                        {(assignedSystems?.length == 0 && !loading) ? <tr><td colSpan={4} className="text-center py-4 text-gray-500 text-2xl">No system found</td></tr> : assignedSystems?.map((system) => (
                             <tr key={system._id} className="border-b hover:bg-gray-50">
                                 <td className="py-2 px-4">{system?.name}</td>
                                 <td className="py-2 px-4">{system?.parts?.length ?? 0}</td>
                                 <td className="py-2 px-4">{system?.assignedTo?.email ?? "NIL"}</td>
                                 <td className="py-2 px-4 capitalize">
-                                    <span className={system.status === "assigned" ? "text-green-600" : "text-red-500"}>{system.status}</span>
+                                    <span className="text-green-600">{system.status}</span>
                                 </td>
                                 <td className="py-2 px-4 text-center space-x-2">
                                     <button onClick={() => handleOpen("view", system)}>
@@ -444,8 +433,8 @@ const SystemListPage = () => {
             )}
 
         </div>
-    );
-};
+    )
+}
 
 const Modal = ({ title, children, onClose }) => {
     return (
@@ -461,4 +450,4 @@ const Modal = ({ title, children, onClose }) => {
     );
 };
 
-export default SystemListPage;
+export default AllocatedSystems
