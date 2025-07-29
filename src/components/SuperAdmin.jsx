@@ -77,6 +77,7 @@ const SuperAdmin = () => {
                 <h1 className="text-2xl font-semibold text-red-500">
                     Unauthorized access
                 </h1>
+                <LogoutButton/>
             </div>
         );
     }
