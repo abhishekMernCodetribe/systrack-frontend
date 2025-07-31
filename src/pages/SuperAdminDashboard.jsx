@@ -4,9 +4,11 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useEmployees } from '../context/EmployeeContext.jsx';
 import { useSystems } from '../context/SystemContext.jsx';
 import { useParts } from '../context/PartsContext.jsx';
+import { HashLoader } from 'react-spinners';
 
 const SuperAdminDashboard = () => {
   const baseURL = import.meta.env.VITE_API_BASE_URL;
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalSystems: 0,
     allocatedSystems: 0,
@@ -29,6 +31,8 @@ const SuperAdminDashboard = () => {
       setStats((prev) => ({ ...prev, ...res.data }));
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -93,6 +97,14 @@ const SuperAdminDashboard = () => {
     { label: 'Active Parts', value: stats.activeParts, key: 'activeParts', color: 'bg-green-500' },
     { label: 'Unusable Parts', value: stats.unusableParts, key: 'unusableParts', color: 'bg-green-500' },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <HashLoader color="#62ad61" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">

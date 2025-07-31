@@ -7,6 +7,7 @@ import {
     UilEdit
 } from "@iconscout/react-unicons";
 import { toast } from 'react-toastify';
+import { HashLoader } from 'react-spinners';
 
 const UnallocatedSystems = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -194,7 +195,13 @@ const UnallocatedSystems = () => {
     };
 
 
-    if (loading) return <p className="text-gray-500">Loading systems...</p>;
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-[60vh]">
+                <HashLoader color="#62ad61" />
+            </div>
+        );
+    }
     if (error) return <p className="text-red-500">{error}</p>;
 
     return (

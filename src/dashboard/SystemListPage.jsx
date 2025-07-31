@@ -12,7 +12,15 @@ import { toast } from 'react-toastify';
 const SystemListPage = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
     const { systems, setSystems } = useSystems();
+    const [system, setSystem] = useState([]);
+
     const [selectedSystem, setSelectedSystem] = useState(null);
+
+    const [searchText, setSearchText] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(2);
+    const [totalPages, setTotalPages] = useState(0);
 
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -59,7 +67,7 @@ const SystemListPage = () => {
         };
 
         fetchAssignedParts();
-    }, [selectedSystem, existingParts]);
+    }, [selectedSystem]);
 
     const handlePartSelect = (e) => {
         setErrors({});
@@ -87,12 +95,19 @@ const SystemListPage = () => {
 
     useEffect(() => {
         fetchSystems();
-    }, []);
+    }, [statusFilter, page, limit]);
+
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            fetchSystems();
+        }, 500);
+        return () => clearTimeout(delay);
+    }, [searchText]);
 
     useEffect(() => {
         fetchUnassignedEmployees();
         fetchFreeParts();
-    }, [systems, selectedSystem])
+    }, [selectedSystem])
 
     const fetchUnassignedEmployees = async () => {
         try {
@@ -117,16 +132,26 @@ const SystemListPage = () => {
     };
 
     const fetchSystems = async () => {
+        setLoading(true);
         try {
-            const res = await axios.get(`${baseURL}/api/system/allsys`);
-            setSystems(res.data.systems);
+            const res = await axios.get(`${baseURL}/api/system/allsys`, {
+                params: {
+                    search: searchText,
+                    status: statusFilter,
+                    page,
+                    limit
+                }
+            });
+            setSystem(res.data.systems);
+            setTotalPages(res.data.totalPages);
         } catch (err) {
-            console.log(err);
-            setError('Failed to fetch parts');
+            console.error(err);
+            setError('Failed to fetch systems');
         } finally {
             setLoading(false);
         }
     };
+
 
     const handleRemovePartFromSystem = async (partId) => {
         try {
@@ -144,15 +169,29 @@ const SystemListPage = () => {
     const handleUnassign = async () => {
         try {
             if (!selectedSystem?._id) return;
-            const res = await axios.patch(`${baseURL}/api/system/unassign/${selectedSystem._id}`);
+
+            const token = localStorage.getItem("token");
+
+            const res = await axios.patch(
+                `${baseURL}/api/system/unassign/${selectedSystem._id}`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
             fetchSystems();
             setSelectedSystem(null);
+            handleClose();
             toast.success(res.data.message);
         } catch (error) {
-            console.error("Error deleting part:", error);
-            toast.error("Failed to delete part.");
+            console.error("Error unassigning system:", error);
+            toast.error("Failed to unassign system.");
         }
-    }
+    };
+
 
     const handleAssign = async (e) => {
         e.preventDefault();
@@ -161,19 +200,23 @@ const SystemListPage = () => {
             return;
         }
         try {
-            const res = await axios.post(`${baseURL}/api/system/assignSystem/${selectedSystem._id}`, {
-                EmployeeID: selectedEmployeeId
-            });
+            const res = await axios.post(`${baseURL}/api/system/assignSystem/${selectedSystem._id}`,
+                {
+                    EmployeeID: selectedEmployeeId
+                },
+                {
+                    withCredentials: true
+                }
+            );
 
             toast.success(res.data.message);
             fetchSystems();
-            // handleClose();
+            handleClose();
         } catch (err) {
             console.error("Assignment error:", err);
             toast.error("Failed to assign system.");
         }
     };
-
 
     const handleUpdate = async (e) => {
         e.preventDefault();
@@ -196,8 +239,14 @@ const SystemListPage = () => {
 
     };
 
+    useEffect(() => {
+        fetchSystems();
+    }, []);
 
-    if (loading) return <p className="text-gray-500">Loading systems...</p>;
+    useEffect(() => {
+        fetchSystems();
+    }, [systems]);
+
     if (error) return <p className="text-red-500">{error}</p>;
 
     return (
@@ -224,39 +273,105 @@ const SystemListPage = () => {
 
             {showModal && <CreateSystem onClose={() => setShowModal(false)} />}
 
-            <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 border rounded-lg shadow text-sm">
-                    <thead className="bg-gray-100 text-gray-600 text-left">
-                        <tr>
-                            <th className="py-2 px-4">System Name</th>
-                            <th className="py-2 px-4">Total Parts</th>
-                            <th className="py-2 px-4">Assigned To</th>
-                            <th className="py-2 px-4">Status</th>
-                            <th className="py-2 px-4 text-center">Action</th>
-                        </tr>
-                    </thead>
 
-                    <tbody className="text-gray-700">
-                        {(systems.length == 0 && !loading) ? <tr><td colSpan={4} className="text-center py-4 text-gray-500 text-2xl">No system found</td></tr> : systems.map((system) => (
-                            <tr key={system._id} className="border-b hover:bg-gray-50">
-                                <td className="py-2 px-4">{system?.name}</td>
-                                <td className="py-2 px-4">{system?.parts?.length ?? 0}</td>
-                                <td className="py-2 px-4">{system?.assignedTo?.email ?? "NIL"}</td>
-                                <td className="py-2 px-4 capitalize">
-                                    <span className={system.status === "assigned" ? "text-green-600" : "text-red-500"}>{system.status}</span>
-                                </td>
-                                <td className="py-2 px-4 text-center space-x-2">
-                                    <button onClick={() => handleOpen("view", system)}>
-                                        <UilEye className="text-blue-600 hover:text-blue-800" />
-                                    </button>
-                                    <button onClick={() => handleOpen("edit", system)}>
-                                        <UilEdit className="text-green-600 hover:text-green-800" />
-                                    </button>
-                                </td>
+            <div className="overflow-x-auto">
+                <div className="flex flex-wrap m-2 items-center gap-4">
+                    <input
+                        type="text"
+                        placeholder="Search by system name"
+                        value={searchText}
+                        onChange={(e) => {
+                            setSearchText(e.target.value);
+                            setPage(1);
+                        }}
+                        className="border rounded px-3 py-2 text-sm w-64"
+                    />
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="border rounded px-3 py-2 text-sm"
+                    >
+
+                        <option value="">All Statuses</option>
+                        <option value="assigned">Assigned</option>
+                        <option value="unassigned">Unassigned</option>
+                    </select>
+                </div>
+
+                <div className="overflow-x-auto flex flex-col justify-between h-[70vh]">
+                    <table className="min-w-full divide-y divide-gray-200 border rounded-lg shadow text-sm">
+                        <thead className="bg-gray-100 text-gray-600 text-left">
+                            <tr>
+                                <th className="py-2 px-4">System Name</th>
+                                <th className="py-2 px-4">Total Parts</th>
+                                <th className="py-2 px-4">Assigned To</th>
+                                <th className="py-2 px-4">Status</th>
+                                <th className="py-2 px-4 text-center">Action</th>
                             </tr>
+                        </thead>
+
+                        <tbody className="text-gray-700">
+                            {(!loading && system?.length == 0) ? <tr><td colSpan={4} className="text-center py-4 text-gray-500 text-2xl">No system found</td></tr> : system?.map((system) => (
+                                <tr key={system._id} className="border-b hover:bg-gray-50">
+                                    <td className="py-2 px-4">{system?.name}</td>
+                                    <td className="py-2 px-4">{system?.parts?.length ?? 0}</td>
+                                    <td className="py-2 px-4">{system?.assignedTo?.email ?? "NIL"}</td>
+                                    <td className="py-2 px-4 capitalize">
+                                        <span className={system.status === "assigned" ? "text-green-600" : "text-red-500"}>{system.status}</span>
+                                    </td>
+                                    <td className="py-2 px-4 text-center space-x-2">
+                                        <button onClick={() => handleOpen("view", system)}>
+                                            <UilEye className="text-blue-600 hover:text-blue-800" />
+                                        </button>
+                                        <button onClick={() => handleOpen("edit", system)}>
+                                            <UilEdit className="text-green-600 hover:text-green-800" />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    <div className="flex justify-center  my-4 space-x-2">
+                        <button
+                            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={page === 1}
+                            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                        >
+                            Prev
+                        </button>
+                        {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                                key={i + 1}
+                                onClick={() => setPage(i + 1)}
+                                className={`px-3 py-1 rounded ${page === i + 1 ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+                            >
+                                {i + 1}
+                            </button>
                         ))}
-                    </tbody>
-                </table>
+                        <button
+                            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={page === totalPages}
+                            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                        <select
+                            value={limit}
+                            onChange={(e) => {
+                                setLimit(Number(e.target.value));
+                                setPage(1);
+                            }}
+                            className="ml-4 px-2 py-1 border rounded text-sm"
+                        >
+                            {[2, 4, 6, 8, 10].map((num) => (
+                                <option key={num} value={num}>
+                                    {num} / page
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
             </div>
 
             {openModal === "view" && selectedSystem && (

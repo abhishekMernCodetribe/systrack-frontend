@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useParts } from '../context/PartsContext';
-import CreateParts from './CreateParts';
 import axios from 'axios';
 import {
     UilEye,
@@ -9,6 +8,7 @@ import {
     UilTrashAlt,
 } from "@iconscout/react-unicons";
 import { toast } from 'react-toastify';
+import { HashLoader } from "react-spinners"
 
 const ActiveParts = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -127,9 +127,15 @@ const ActiveParts = () => {
         }
     };
 
-    
 
-    if (loading) return <p className="text-gray-500">Loading parts...</p>;
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-[60vh]">
+                <HashLoader color="#62ad61" />
+            </div>
+        );
+    }
     if (error) return <p className="text-red-500">{error}</p>;
 
     return (

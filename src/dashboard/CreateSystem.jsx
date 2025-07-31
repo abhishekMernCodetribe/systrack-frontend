@@ -3,6 +3,7 @@ import axios from 'axios';
 import { X } from "lucide-react";
 import { toast } from "react-toastify";
 import { useSystems } from '../context/SystemContext';
+import { HashLoader } from 'react-spinners';
 
 const CreateSystem = ({ onClose }) => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -87,7 +88,9 @@ const CreateSystem = ({ onClose }) => {
         }
     }
 
+    const token = localStorage.getItem('token');
     const handleSubmit = async (e) => {
+        setLoading(true);
         e.preventDefault();
         if (!name || !selectedPartIds) {
             toast.error("Please enter the required details");
@@ -99,7 +102,11 @@ const CreateSystem = ({ onClose }) => {
                 name,
                 parts: selectedPartIds,
                 EmployeeID: selectedEmployeeId
-            });
+            },
+            {
+                withCredentials: true
+            }
+            );
             fetchSystems();
             toast.success(res.data.message);
             onClose();
@@ -110,13 +117,15 @@ const CreateSystem = ({ onClose }) => {
             } else {
                 console.error("Unexpected error:", err);
             }
+        } finally {
+            setLoading(false);
         }
     };
 
     if (loading) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center bg-white">
-                <p className="text-lg font-medium text-gray-600 animate-pulse">Loading parts...</p>
+            <div className="flex justify-center items-center min-h-[60vh]">
+                <HashLoader color="#62ad61" />
             </div>
         );
     }

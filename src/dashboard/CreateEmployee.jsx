@@ -3,9 +3,11 @@ import { useEmployees } from '../context/EmployeeContext';
 import { X } from "lucide-react";
 import axios from "axios";
 import { toast } from 'react-toastify';
+import { HashLoader } from 'react-spinners';
 
 const CreateEmployee = ({ onClose }) => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
+    const [loading , setLoading] = useState(false);
     const { setEmployees } = useEmployees();
     const [newEmployee, setNewEmployee] = useState({
         name: '',
@@ -44,6 +46,7 @@ const CreateEmployee = ({ onClose }) => {
 
 
     const handleCreateEmployee = async (e) => {
+        setLoading(true);
         e.preventDefault();
         try {
             setErrors({});
@@ -69,8 +72,18 @@ const CreateEmployee = ({ onClose }) => {
             } else {
                 console.error("Error in create employee", err);
             }
+        } finally {
+            setLoading(false);
         }
     };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-[60vh]">
+                <HashLoader color="#62ad61" />
+            </div>
+        );
+    }
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">

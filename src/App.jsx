@@ -13,6 +13,7 @@ import AllocatedSystems from "./dashboard/AllocatedSystems";
 import UnallocatedSystems from "./dashboard/UnallocatedSystems";
 import ActiveParts from "./dashboard/ActiveParts";
 import UnusableParts from "./dashboard/UnusableParts";
+import SystemLogs from "./dashboard/SystemLogs";
 
 const App = () => {
   return (
@@ -40,6 +41,7 @@ const App = () => {
             <Route path="unusableParts" element={<UnusableParts />} />
             <Route path="parts" element={<PartsList />} />
             <Route path="barcode" element={<BarcodeScanner />} />
+            <Route path="logs" element={<SystemLogs />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/login" replace />} />

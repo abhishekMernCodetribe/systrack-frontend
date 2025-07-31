@@ -317,7 +317,6 @@ const PartsList = () => {
             {openModal === "edit" && selectedPart && (
                 <Modal title="Edit Part Details" onClose={handleClose}>
                     <div className="space-y-4">
-                        {/* Part Type */}
                         <div>
                             <label className="block font-semibold mb-1">Part Type</label>
                             <select

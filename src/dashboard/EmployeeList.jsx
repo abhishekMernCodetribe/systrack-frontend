@@ -14,9 +14,24 @@ import isEqual from "lodash.isequal";
 const EmployeeList = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
     const { employees, setEmployees } = useEmployees();
+    const [employee, setEmployee] = useState([]);
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(2);
+    const [totalPages, setTotalPages] = useState(0);
+    const [searchText, setSearchText] = useState('');
+
     useEffect(() => {
         fetchEmployees();
-    }, []);
+    }, [page, limit]);
+
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            fetchEmployees();
+        }, 500);
+
+        return () => clearTimeout(delay);
+    }, [searchText]);
+
 
     const navigate = useNavigate();
     const [openMenuId, setOpenMenuId] = useState(null);
@@ -26,13 +41,6 @@ const EmployeeList = () => {
     const [openModal, setOpenModal] = useState(null);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [errors, setErrors] = useState({});
-
-    const [searchText, setSearchText] = useState('');
-    const filteredEmployees = useMemo(() => {
-        return employees.filter(emp =>
-            emp.email.toLowerCase().includes(searchText.toLowerCase())
-        );
-    }, [employees, searchText]);
 
     const [editForm, setEditForm] = useState({
         name: '',
@@ -137,12 +145,22 @@ const EmployeeList = () => {
     };
 
     const fetchEmployees = async () => {
+        setLoading(true);
         try {
-            const res = await axios.get(`${baseURL}/api/employee/allemployee`);
-            setEmployees(res.data.employees);
+            const res = await axios.get(`${baseURL}/api/employee/allemployee`, {
+                params: {
+                    search: searchText,
+                    page,
+                    limit
+                }
+            });
+
+            setEmployee(res.data.employees);
+            setTotalPages(res.data.totalPages);
         } catch (err) {
-            console.log(err);
-            setError('Failed to fetch parts');
+            setEmployee([]);
+            console.error(err);
+            setError('Failed to fetch employees');
         } finally {
             setLoading(false);
         }
@@ -162,7 +180,7 @@ const EmployeeList = () => {
         }
     };
 
-    if (loading) return <p className="text-gray-500">Loading employees...</p>;
+    // if (loading) return <p className="text-gray-500">Loading employees...</p>;
     if (error) return <p className="text-red-500">{error}</p>;
 
     return (
@@ -195,49 +213,93 @@ const EmployeeList = () => {
                         type="text"
                         placeholder="Search by email"
                         value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
+                        onChange={(e) => {
+                            setSearchText(e.target.value);
+                            setPage(1);
+                        }}
                         className="border rounded px-3 py-2 text-sm w-64"
                     />
                 </div>
-                <table className="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead className="bg-gray-100 text-gray-600 text-left">
-                        <tr>
-                            <th className="py-2 px-4">Name</th>
-                            <th className="py-2 px-4">Email</th>
-                            <th className="py-2 px-4">Phone</th>
-                            <th className="py-2 px-4 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody className="text-gray-700">
-                        {(filteredEmployees?.length === 0 && !loading) ? (
+                <div className="overflow-x-auto flex flex-col justify-between h-[70vh]">
+                    <table className="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead className="bg-gray-100 text-gray-600 text-left">
                             <tr>
-                                <td colSpan={4} className="text-center py-4 text-gray-500 text-2xl">
-                                    No Employees found
-                                </td>
+                                <th className="py-2 px-4">Name</th>
+                                <th className="py-2 px-4">Email</th>
+                                <th className="py-2 px-4">Phone</th>
+                                <th className="py-2 px-4 text-center">Action</th>
                             </tr>
-                        ) : (
-                            filteredEmployees.map((emp) => (
-                                <tr key={emp._id} className="border-b hover:bg-gray-50">
-                                    <td className="py-2 px-4">{emp.name}</td>
-                                    <td className="py-2 px-4">{emp.email}</td>
-                                    <td className="py-2 px-4">{emp.phone}</td>
-                                    <td className="py-2 px-4 text-center space-x-2">
-                                        <button onClick={() => handleOpen("view", emp)}>
-                                            <UilEye className="text-blue-600 hover:text-blue-800" />
-                                        </button>
-                                        <button onClick={() => handleOpen("edit", emp)}>
-                                            <UilEdit className="text-green-600 hover:text-green-800" />
-                                        </button>
-                                        <button onClick={() => handleOpen("delete", emp)}>
-                                            <UilTrashAlt className="text-red-600 hover:text-red-800" />
-                                        </button>
+                        </thead>
+                        <tbody className="text-gray-700">
+                            {(!loading && employee?.length === 0) ? (
+                                <tr>
+                                    <td colSpan={4} className="text-center py-4 text-gray-500 text-2xl">
+                                        No Employees found
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
+                            ) : (
+                                employee.map((emp) => (
+                                    <tr key={emp._id} className="border-b hover:bg-gray-50">
+                                        <td className="py-2 px-4">{emp.name}</td>
+                                        <td className="py-2 px-4">{emp.email}</td>
+                                        <td className="py-2 px-4">{emp.phone}</td>
+                                        <td className="py-2 px-4 text-center space-x-2">
+                                            <button onClick={() => handleOpen("view", emp)}>
+                                                <UilEye className="text-blue-600 hover:text-blue-800" />
+                                            </button>
+                                            <button onClick={() => handleOpen("edit", emp)}>
+                                                <UilEdit className="text-green-600 hover:text-green-800" />
+                                            </button>
+                                            <button onClick={() => handleOpen("delete", emp)}>
+                                                <UilTrashAlt className="text-red-600 hover:text-red-800" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
 
-                </table>
+                    <div className="flex justify-center  my-4 space-x-2">
+                        <button
+                            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={page === 1}
+                            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                        >
+                            Prev
+                        </button>
+                        {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                                key={i + 1}
+                                onClick={() => setPage(i + 1)}
+                                className={`px-3 py-1 rounded ${page === i + 1 ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+                        <button
+                            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={page === totalPages}
+                            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                        <select
+                            value={limit}
+                            onChange={(e) => {
+                                setLimit(Number(e.target.value));
+                                setPage(1);
+                            }}
+                            className="ml-4 px-2 py-1 border rounded text-sm"
+                        >
+                            {[2, 4, 6, 8, 10].map((num) => (
+                                <option key={num} value={num}>
+                                    {num} / page
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
             </div>
 
             {/* Modals */}

@@ -10,6 +10,7 @@ import { FaBars, FaComputer } from "react-icons/fa6";
 import { HiMiniCpuChip } from "react-icons/hi2";
 import { BiBarcodeReader } from "react-icons/bi";
 import { BsFillPeopleFill } from "react-icons/bs";
+import { HashLoader } from "react-spinners";
 
 const SuperAdmin = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -62,12 +63,11 @@ const SuperAdmin = () => {
         verifySuperAdmin();
     }, [token, role, loading, navigate]);
 
+
     if (loading || componentLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                <h1 className="text-xl font-medium text-gray-600 animate-pulse">
-                    Verifying superadmin access...
-                </h1>
+            <div className="flex justify-center items-center min-h-[60vh]">
+                <HashLoader color="#62ad61" />
             </div>
         );
     }
@@ -189,6 +189,19 @@ const SuperAdmin = () => {
                     >
                         <BiBarcodeReader className="text-lg" />
                         <span>Scan barcode</span>
+                    </NavLink>
+
+                    <NavLink
+                        to="/superadmin/logs"
+                        onClick={() => {
+                            setIsSidebarOpen(false);
+                        }}
+                        className={({ isActive }) =>
+                            `flex items-center gap-2 text-sm px-4 py-2 rounded hover:bg-gray-700 ${isActive ? "bg-blue-600 font-semibold" : ""
+                            }`
+                        }
+                    >
+                        <span>System Logs</span>
                     </NavLink>
                 </nav>
 
