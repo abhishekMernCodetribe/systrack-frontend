@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useParts } from '../context/PartsContext';
 import CreateParts from './CreateParts';
 import axios from 'axios';
 import {
@@ -12,13 +11,13 @@ import { toast } from 'react-toastify';
 
 const PartsList = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
-    const { parts } = useParts();
     const [part, setPart] = useState([]);
 
     const [page, setPage] = useState(1);
 
     const [limit, setLimit] = useState(2);
     const [totalPages, setTotalPages] = useState(0);
+    const [totalParts, setTotalParts] = useState(0);
 
 
     const navigate = useNavigate();
@@ -39,6 +38,10 @@ const PartsList = () => {
     const modelRef = useRef();
 
     useEffect(() => {
+        fetchStats();
+    }, []);
+
+    useEffect(() => {
         fetchParts();
     }, [statusFilter, page, limit]);
 
@@ -48,6 +51,19 @@ const PartsList = () => {
         }, 500);
         return () => clearTimeout(delay);
     }, [searchText]);
+
+    const fetchStats = async () => {
+        try {
+            const res = await axios.get(`${baseURL}/api/system/stats`);
+            // setTotalParts((prev) => ({ ...prev, ...res.data }));
+            setTotalParts(res.data.totalParts);
+        } catch (error) {
+            console.error('Error fetching dashboard stats:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     useEffect(() => {
         if (errors.partType) {
@@ -146,7 +162,7 @@ const PartsList = () => {
         <div className="w-full px-4 py-4">
             <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
                 <h2 className="text-2xl font-bold text-gray-800">
-                    Total Parts ({parts?.length})
+                    Total Parts ({totalParts})
                 </h2>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-start sm:items-center">
                     <button
@@ -164,7 +180,7 @@ const PartsList = () => {
                 </div>
             </div>
 
-            {showModal && <CreateParts onClose={() => setShowModal(false)} />}
+            {showModal && <CreateParts onClose={() => setShowModal(false)} setPart={setPart} page={page} limit={limit} />}
 
             <div className="overflow-x-auto border rounded-lg shadow">
                 <div className="space-y-4">

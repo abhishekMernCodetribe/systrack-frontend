@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useEmployees } from '../context/EmployeeContext';
 import CreateEmployee from './CreateEmployee';
 import {
     UilEye,
@@ -13,12 +12,12 @@ import isEqual from "lodash.isequal";
 
 const EmployeeList = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
-    const { employees, setEmployees } = useEmployees();
     const [employee, setEmployee] = useState([]);
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(2);
     const [totalPages, setTotalPages] = useState(0);
     const [searchText, setSearchText] = useState('');
+    const [totalEmployee, setTotalEmployee] = useState(0);
 
     useEffect(() => {
         fetchEmployees();
@@ -32,6 +31,20 @@ const EmployeeList = () => {
         return () => clearTimeout(delay);
     }, [searchText]);
 
+    const fetchStats = async () => {
+        try {
+            const res = await axios.get(`${baseURL}/api/system/stats`);
+            setTotalEmployee(res.data.totalEmployees)
+        } catch (error) {
+            console.error('Error fetching dashboard stats:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchStats();
+    }, [])
 
     const navigate = useNavigate();
     const [openMenuId, setOpenMenuId] = useState(null);
@@ -187,7 +200,7 @@ const EmployeeList = () => {
         <div className="w-full px-4 py-4">
             <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
                 <h2 className="text-2xl font-bold text-gray-800">
-                    Total Employees ({employees.length > 0 ? employees.length : '0'})
+                    Total Employees ({totalEmployee})
                 </h2>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-start sm:items-center">
                     <button

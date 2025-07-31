@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useSystems } from '../context/SystemContext';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
     UilEye,
@@ -11,7 +10,6 @@ import { toast } from 'react-toastify';
 
 const SystemListPage = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
-    const { systems, setSystems } = useSystems();
     const [system, setSystem] = useState([]);
 
     const [selectedSystem, setSelectedSystem] = useState(null);
@@ -21,6 +19,7 @@ const SystemListPage = () => {
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(2);
     const [totalPages, setTotalPages] = useState(0);
+    const [totalSystem, setTotalSystem] = useState(0);
 
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -36,6 +35,17 @@ const SystemListPage = () => {
     const [parts, setParts] = useState([]);
     const [allParts, setAllParts] = useState([]);
     const [selectedPartIds, setSelectedPartIds] = useState([]);
+
+    const fetchStats = async () => {
+        try {
+            const res = await axios.get(`${baseURL}/api/system/stats`);
+            setTotalSystem(res.data.totalSystems);
+        } catch (error) {
+            console.error('Error fetching dashboard stats:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleNameChange = (e) => {
         setErrors({});
@@ -240,12 +250,8 @@ const SystemListPage = () => {
     };
 
     useEffect(() => {
-        fetchSystems();
+        fetchStats();
     }, []);
-
-    useEffect(() => {
-        fetchSystems();
-    }, [systems]);
 
     if (error) return <p className="text-red-500">{error}</p>;
 
@@ -253,7 +259,7 @@ const SystemListPage = () => {
         <div className="w-full px-4 py-4">
             <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
                 <h2 className="text-2xl font-bold text-gray-800">
-                    Total Systems ({systems.length > 0 ? systems.length : '0'})
+                    Total Systems ({totalSystem})
                 </h2>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-start sm:items-center">
                     <button

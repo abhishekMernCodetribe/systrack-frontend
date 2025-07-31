@@ -3,9 +3,6 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import LogoutButton from "./LogoutButton";
-import { useEmployees } from '../context/EmployeeContext.jsx';
-import { useSystems } from '../context/SystemContext.jsx';
-import { useParts } from '../context/PartsContext.jsx';
 import { FaBars, FaComputer } from "react-icons/fa6";
 import { HiMiniCpuChip } from "react-icons/hi2";
 import { BiBarcodeReader } from "react-icons/bi";
@@ -19,10 +16,6 @@ const SuperAdmin = () => {
     const [componentLoading, setComponentLoading] = useState(true);
     const { token, role, loading } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-    const { setEmployees } = useEmployees();
-    const { setSystems } = useSystems();
-    const { setParts } = useParts();
 
     useEffect(() => {
         if (loading) return;
@@ -83,33 +76,6 @@ const SuperAdmin = () => {
         );
     }
 
-    const getAllEmployee = async () => {
-        try {
-            const res = await axios.get(`${baseURL}/api/employee/allemployee`);
-            setEmployees(res.data.employees);
-        } catch (error) {
-            console.error(`Error fetching Employees:`, error)
-        }
-    }
-
-    const getAllParts = async () => {
-        try {
-            const res = await axios.get(`${baseURL}/api/part`);
-            setParts(res.data.parts);
-        } catch (error) {
-            console.error(`Error fetching parts:`, error)
-        }
-    }
-
-    const getAllSystems = async () => {
-        try {
-            const res = await axios.get(`${baseURL}/api/system/allsys`);
-            setSystems(res.data.systems);
-        } catch (error) {
-            console.error(`Error fetching parts:`, error)
-        }
-    }
-
     return (
         <div className="flex min-h-screen">
             {/* Mobile toggle button */}
@@ -136,7 +102,6 @@ const SuperAdmin = () => {
                     <NavLink
                         to="/superadmin/systems"
                         onClick={() => {
-                            getAllSystems();
                             setIsSidebarOpen(false);
                         }}
                         className={({ isActive }) =>
@@ -151,7 +116,6 @@ const SuperAdmin = () => {
                     <NavLink
                         to="/superadmin/parts"
                         onClick={() => {
-                            getAllParts();
                             setIsSidebarOpen(false);
                         }}
                         className={({ isActive }) =>
@@ -165,7 +129,7 @@ const SuperAdmin = () => {
                     <NavLink
                         to="/superadmin/employees"
                         onClick={() => {
-                            getAllEmployee();
+
                             setIsSidebarOpen(false);
                         }}
                         className={({ isActive }) =>

@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { useEmployees } from '../context/EmployeeContext.jsx';
-import { useSystems } from '../context/SystemContext.jsx';
-import { useParts } from '../context/PartsContext.jsx';
 import { HashLoader } from 'react-spinners';
 
 const SuperAdminDashboard = () => {
@@ -20,10 +17,6 @@ const SuperAdminDashboard = () => {
   });
 
   const navigate = useNavigate();
-
-  const { setEmployees } = useEmployees();
-  const { setSystems } = useSystems();
-  const { setParts } = useParts()
 
   const fetchStats = async () => {
     try {
@@ -47,41 +40,30 @@ const SuperAdminDashboard = () => {
     switch (type) {
       case 'systems':
         endpoint = '/api/system/allsys';
-        setter = setSystems;
         break;
       case 'parts':
         endpoint = '/api/part';
-        setter = setParts;
         break;
       case 'activeParts':
         endpoint = '/api/part';
-        setter = setParts;
         break;
       case 'unusableParts':
         endpoint = '/api/part';
-        setter = setParts;
         break;
       case 'employees':
         endpoint = '/api/employee/allemployee';
-        setter = setEmployees;
         break;
       case 'allocatedSystems':
         endpoint = '/api/system/allsys';
-        setter = setSystems;
         break;
       case 'unallocatedSystems':
         endpoint = '/api/system/allsys';
-        setter = setSystems;
         break;
       default:
         return;
     }
 
     try {
-      const res = await axios.get(`${baseURL}${endpoint}`);
-      if (type == 'employees') setEmployees(res.data[type]);
-      else if (type == 'parts' || type === 'activeParts' || type === 'unusableParts') setParts(res.data[type]);
-      else if (type == 'systems' || type == 'allocatedSystems') setSystems(res.data[type]);
       navigate(`${type}`);
     } catch (error) {
       console.error(`Error fetching ${type}:`, error);

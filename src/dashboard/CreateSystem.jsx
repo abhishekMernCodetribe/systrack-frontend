@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { X } from "lucide-react";
 import { toast } from "react-toastify";
-import { useSystems } from '../context/SystemContext';
 import { HashLoader } from 'react-spinners';
 
 const CreateSystem = ({ onClose }) => {
@@ -11,7 +10,6 @@ const CreateSystem = ({ onClose }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [errors, setErrors] = useState({});
-    const { setSystems } = useSystems();
 
     const [allParts, setAllParts] = useState([]);
 
@@ -103,9 +101,9 @@ const CreateSystem = ({ onClose }) => {
                 parts: selectedPartIds,
                 EmployeeID: selectedEmployeeId
             },
-            {
-                withCredentials: true
-            }
+                {
+                    withCredentials: true
+                }
             );
             fetchSystems();
             toast.success(res.data.message);

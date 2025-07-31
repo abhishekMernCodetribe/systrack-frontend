@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSystems } from '../context/SystemContext';
 import axios from 'axios';
 import {
     UilEye,
@@ -11,7 +10,6 @@ import { HashLoader } from "react-spinners";
 
 const AllocatedSystems = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
-    const { systems, setSystems } = useSystems();
     const assignedSystems = useMemo(() => {
         return systems?.filter(system => system.status === 'assigned');
     }, [systems]);

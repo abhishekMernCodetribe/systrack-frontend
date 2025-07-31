@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useSystems } from '../context/SystemContext';
+import { useLocation, useNavigate } from 'react-router-dom';;
 import axios from 'axios';
 import {
     UilEye,

@@ -2,13 +2,11 @@ import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useParts } from "../context/PartsContext";
 import { HashLoader } from "react-spinners";
 
-const CreateParts = ({ onClose }) => {
+const CreateParts = ({ onClose , setPart, page, limit}) => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
     const [loading, setLoading] = useState(false);
-    const { parts, setParts } = useParts();
     const [specError, setSpecError] = useState('');
 
     const [formData, setFormData] = useState({
@@ -56,8 +54,13 @@ const CreateParts = ({ onClose }) => {
 
     const fetchParts = async () => {
         try {
-            const res = await axios.get(`${baseURL}/api/part`);
-            setParts(res.data.parts);
+            const res = await axios.get(`${baseURL}/api/part`, {
+                params: {
+                    page,
+                    limit
+                }
+            });;
+            setPart(res.data.parts);
         } catch (err) {
             console.log(err);
             setErrors('Failed to fetch parts');
