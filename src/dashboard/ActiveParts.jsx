@@ -11,8 +11,8 @@ import { HashLoader } from "react-spinners"
 
 const ActiveParts = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
+    const [parts, setParts] = useState([]);
 
-    const { parts, setParts } = useParts();
     useEffect(() => {
         fetchParts();
     }, []);
@@ -115,12 +115,14 @@ const ActiveParts = () => {
     };
 
     const fetchParts = async () => {
+        setLoading(true);
         try {
             const res = await axios.get(`${baseURL}/api/part`);
             setParts(res.data.parts);
         } catch (err) {
+            setParts([]);
             console.log(err);
-            setError('Failed to fetch parts');
+            //setError('Failed to fetch parts');
         } finally {
             setLoading(false);
         }

@@ -4,7 +4,7 @@ import axios from "axios";
 import { toast } from 'react-toastify';
 import { HashLoader } from 'react-spinners';
 
-const CreateEmployee = ({ onClose }) => {
+const CreateEmployee = ({ onClose, setEmployee }) => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
     const [loading , setLoading] = useState(false);
     const [newEmployee, setNewEmployee] = useState({
@@ -50,7 +50,7 @@ const CreateEmployee = ({ onClose }) => {
             setErrors({});
             const res = await axios.post(`${baseURL}/api/employee`, newEmployee);
             if (res.status === 201) {
-                setEmployees((prev) => [...prev, res.data]);
+                setEmployee((prev) => [...prev, res.data]);
                 toast.success(res.data.message || "Employee created successfully");
                 setNewEmployee({
                     name: '',

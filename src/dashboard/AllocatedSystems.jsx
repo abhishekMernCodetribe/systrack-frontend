@@ -10,9 +10,29 @@ import { HashLoader } from "react-spinners";
 
 const AllocatedSystems = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
+    const [system, setSystem] = useState([]);
+
+    const fetchSystems = async () => {
+        setLoading(true);
+        try {
+            const res = await axios.get(`${baseURL}/api/system/allsys`);
+            setSystem(res.data.systems);
+        } catch (err) {
+            console.error(err);
+            setError('Failed to fetch systems');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchSystems();
+    }, []);
+
     const assignedSystems = useMemo(() => {
-        return systems?.filter(system => system.status === 'assigned');
-    }, [systems]);
+        return system?.filter(system => system.status === 'assigned');
+    }, [system]);
+    
     const [selectedSystem, setSelectedSystem] = useState(null);
 
     const navigate = useNavigate();
@@ -88,7 +108,7 @@ const AllocatedSystems = () => {
     useEffect(() => {
         fetchUnassignedEmployees();
         fetchFreeParts();
-    }, [systems, selectedSystem])
+    }, [system, selectedSystem])
 
     const fetchUnassignedEmployees = async () => {
         try {
@@ -98,18 +118,6 @@ const AllocatedSystems = () => {
             console.error("Failed to fetch Unassigned employees:", error);
         }
     }
-
-    const fetchSystems = async () => {
-        try {
-            const res = await axios.get(`${baseURL}/api/system/allsys`);
-            setSystems(res.data.systems);
-        } catch (err) {
-            console.log(err);
-            setError('Failed to fetch parts');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     useEffect(() => {
         fetchSystems();

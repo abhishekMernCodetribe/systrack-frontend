@@ -9,6 +9,7 @@ import {
     UilTrashAlt,
 } from "@iconscout/react-unicons";
 import isEqual from "lodash.isequal";
+import { HashLoader } from 'react-spinners';
 
 const EmployeeList = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -193,7 +194,13 @@ const EmployeeList = () => {
         }
     };
 
-    // if (loading) return <p className="text-gray-500">Loading employees...</p>;
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-[60vh]">
+                <HashLoader color="#62ad61" />
+            </div>
+        );
+    }
     if (error) return <p className="text-red-500">{error}</p>;
 
     return (
@@ -218,7 +225,7 @@ const EmployeeList = () => {
                 </div>
             </div>
 
-            {showModal && <CreateEmployee onClose={() => setShowModal(false)} />}
+            {showModal && <CreateEmployee onClose={() => setShowModal(false)} setEmployee={setEmployee} />}
 
             <div className="overflow-x-auto border rounded-lg shadow">
                 <div className="flex flex-wrap m-2 items-center gap-4">

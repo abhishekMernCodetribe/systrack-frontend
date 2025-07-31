@@ -55,7 +55,6 @@ const PartsList = () => {
     const fetchStats = async () => {
         try {
             const res = await axios.get(`${baseURL}/api/system/stats`);
-            // setTotalParts((prev) => ({ ...prev, ...res.data }));
             setTotalParts(res.data.totalParts);
         } catch (error) {
             console.error('Error fetching dashboard stats:', error);

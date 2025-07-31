@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import { toast } from "react-toastify";
 import { HashLoader } from 'react-spinners';
 
-const CreateSystem = ({ onClose }) => {
+const CreateSystem = ({ onClose, setSystem }) => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
     const [parts, setParts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -31,7 +31,7 @@ const CreateSystem = ({ onClose }) => {
     const fetchSystems = async () => {
         try {
             const res = await axios.get(`${baseURL}/api/system/allsys`);
-            setSystems(res.data.systems);
+            setSystem(res.data.systems);
         } catch (err) {
             console.log(err);
             setError('Failed to fetch parts');
@@ -86,14 +86,16 @@ const CreateSystem = ({ onClose }) => {
         }
     }
 
-    const token = localStorage.getItem('token');
     const handleSubmit = async (e) => {
+        const token = localStorage.getItem('token');
         setLoading(true);
         e.preventDefault();
         if (!name || !selectedPartIds) {
             toast.error("Please enter the required details");
             return;
         };
+
+        console.log(name, selectedPartIds, selectedEmployeeId)
 
         try {
             const res = await axios.post(`${baseURL}/api/system/`, {
@@ -102,7 +104,9 @@ const CreateSystem = ({ onClose }) => {
                 EmployeeID: selectedEmployeeId
             },
                 {
-                    withCredentials: true
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 }
             );
             fetchSystems();

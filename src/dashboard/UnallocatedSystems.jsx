@@ -10,10 +10,13 @@ import { HashLoader } from 'react-spinners';
 
 const UnallocatedSystems = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
-    const { systems, setSystems } = useSystems();
+
+    const [system, setSystem] = useState([]);
+   
+
     const unassignedSystems = useMemo(() => {
-        return systems?.filter(system => system.status === 'unassigned');
-    }, [systems]);
+        return system?.filter(system => system.status === 'unassigned');
+    }, [system]);
     const [selectedSystem, setSelectedSystem] = useState(null);
 
     const navigate = useNavigate();
@@ -89,7 +92,7 @@ const UnallocatedSystems = () => {
     useEffect(() => {
         fetchUnassignedEmployees();
         fetchFreeParts();
-    }, [systems, selectedSystem])
+    }, [system, selectedSystem])
 
     const fetchUnassignedEmployees = async () => {
         try {
@@ -101,12 +104,13 @@ const UnallocatedSystems = () => {
     }
 
     const fetchSystems = async () => {
+        setLoading(true);
         try {
             const res = await axios.get(`${baseURL}/api/system/allsys`);
-            setSystems(res.data.systems);
+            setSystem(res.data.systems);
         } catch (err) {
-            console.log(err);
-            setError('Failed to fetch parts');
+            console.error(err);
+            setError('Failed to fetch systems');
         } finally {
             setLoading(false);
         }

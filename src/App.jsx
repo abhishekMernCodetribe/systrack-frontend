@@ -14,6 +14,7 @@ import UnallocatedSystems from "./dashboard/UnallocatedSystems";
 import ActiveParts from "./dashboard/ActiveParts";
 import UnusableParts from "./dashboard/UnusableParts";
 import SystemLogs from "./dashboard/SystemLogs";
+import ResetPassword from "./components/ResetPassword";
 
 const App = () => {
   return (
@@ -43,6 +44,8 @@ const App = () => {
             <Route path="barcode" element={<BarcodeScanner />} />
             <Route path="logs" element={<SystemLogs />} />
           </Route>
+
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           <Route path="*" element={<Navigate to="/login" replace />} />
 

@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 const SystemListPage = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL;
     const [system, setSystem] = useState([]);
+    const [parts, setParts] = useState([]);
 
     const [selectedSystem, setSelectedSystem] = useState(null);
 
@@ -32,7 +33,6 @@ const SystemListPage = () => {
     const [selectedEmployeeId, setSelectedEmployeeId] = useState(undefined);
 
     const [existingParts, setExistingParts] = useState([]);
-    const [parts, setParts] = useState([]);
     const [allParts, setAllParts] = useState([]);
     const [selectedPartIds, setSelectedPartIds] = useState([]);
 
@@ -162,7 +162,6 @@ const SystemListPage = () => {
         }
     };
 
-
     const handleRemovePartFromSystem = async (partId) => {
         try {
             await axios.put(`${baseURL}/api/system/${selectedSystem._id}/remove-part/${partId}`);
@@ -204,6 +203,7 @@ const SystemListPage = () => {
 
 
     const handleAssign = async (e) => {
+        const token = localStorage.getItem('token');
         e.preventDefault();
         if (!selectedEmployeeId) {
             setErrors({ employee: "Please select an employee before assigning." });
@@ -215,7 +215,9 @@ const SystemListPage = () => {
                     EmployeeID: selectedEmployeeId
                 },
                 {
-                    withCredentials: true
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
                 }
             );
 
@@ -251,6 +253,7 @@ const SystemListPage = () => {
 
     useEffect(() => {
         fetchStats();
+        fetchFreeParts();
     }, []);
 
     if (error) return <p className="text-red-500">{error}</p>;
@@ -277,7 +280,7 @@ const SystemListPage = () => {
                 </div>
             </div>
 
-            {showModal && <CreateSystem onClose={() => setShowModal(false)} />}
+            {showModal && <CreateSystem onClose={() => setShowModal(false)} setSystem={setSystem} />}
 
 
             <div className="overflow-x-auto">
